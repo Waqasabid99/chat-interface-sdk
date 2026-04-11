@@ -1,0 +1,265 @@
+/**
+ * InputBar.module.css
+ *
+ * Scoped styles for the InputBar component.
+ * All color values reference --ai-* CSS variables inherited from ChatWidget.
+ * No hard-coded colors — the full palette adapts to light/dark theme and
+ * primaryColor automatically.
+ *
+ * Layout goals:
+ *  - Textarea grows from 1 line to MAX_ROWS (5), then scrolls internally
+ *  - Send button stays pinned to the bottom-right of the input row
+ *  - The whole bar sits flush against the panel bottom, slightly elevated
+ *    with a top border and subtle background
+ */
+
+/* ── Root wrapper ─────────────────────────────────────────────────────────── */
+
+.root {
+  display:          flex;
+  flex-direction:   column;
+  gap:              0;
+  background-color: var(--ai-surface);
+  flex-shrink:      0; /* never crushed by MessageList */
+  position:         relative;
+}
+
+/* ── Top divider ──────────────────────────────────────────────────────────── */
+
+.divider {
+  height:           1px;
+  background-color: var(--ai-border);
+  flex-shrink:      0;
+}
+
+/* ── Inner row: textarea + send button ───────────────────────────────────── */
+
+.inner {
+  display:        flex;
+  align-items:    flex-end; /* pin both to bottom so button stays low as textarea grows */
+  gap:            0.5rem;
+  padding:        0.625rem 0.75rem; /* 10px 12px */
+}
+
+/* ── Textarea ─────────────────────────────────────────────────────────────── */
+
+.textarea {
+  /* Reset */
+  all:              unset;
+  display:          block;
+  box-sizing:       border-box;
+
+  /* Layout */
+  flex:             1 1 0;
+  min-width:        0;
+  resize:           none;
+  overflow:         hidden; /* JS sets to "auto" when content exceeds MAX_HEIGHT */
+
+  /* Typography — inherits from ChatWidget root */
+  font-family:      var(--ai-font-sans);
+  font-size:        var(--ai-font-size-base);
+  line-height:      22px; /* must match LINE_HEIGHT_PX in .tsx */
+  color:            var(--ai-text);
+
+  /* Sizing */
+  min-height:       42px; /* 1 line: 22px line-height + 20px padding */
+  max-height:       130px; /* 5 lines: 22*5 + 20 = 130px */
+  padding:          10px 0.75rem;
+
+  /* Appearance */
+  background-color: var(--ai-bg);
+  border:           1.5px solid var(--ai-border);
+  border-radius:    var(--ai-radius);
+  outline:          none;
+  caret-color:      var(--ai-primary);
+
+  /* Smooth border + shadow transitions */
+  transition:
+    border-color 150ms ease,
+    box-shadow   150ms ease,
+    background-color 150ms ease;
+
+  /* Scrollbar styling (Webkit) */
+  scrollbar-width: thin;
+  scrollbar-color: var(--ai-border) transparent;
+}
+
+.textarea::-webkit-scrollbar {
+  width: 4px;
+}
+.textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+.textarea::-webkit-scrollbar-thumb {
+  background-color: var(--ai-border);
+  border-radius:    2px;
+}
+
+/* Focus ring — meets WCAG 2.4.7 */
+.textarea:focus {
+  border-color: var(--ai-primary);
+  box-shadow:   0 0 0 3px color-mix(in srgb, var(--ai-primary) 18%, transparent);
+  background-color: var(--ai-bg);
+}
+
+/* Placeholder */
+.textarea::placeholder {
+  color: var(--ai-text-muted);
+  opacity: 1; /* Firefox reduces opacity by default */
+}
+
+/* Disabled state */
+.textarea:disabled,
+.loading .textarea {
+  cursor:           not-allowed;
+  opacity:          0.6;
+  background-color: var(--ai-surface);
+  border-color:     var(--ai-border);
+}
+
+/* ── Send button ──────────────────────────────────────────────────────────── */
+
+.sendButton {
+  /* Reset */
+  all:              unset;
+  box-sizing:       border-box;
+
+  /* Size — square, fixed */
+  display:          inline-flex;
+  align-items:      center;
+  justify-content:  center;
+  flex-shrink:      0;
+  width:            38px;
+  height:           38px;
+  border-radius:    var(--ai-radius);
+
+  /* Default (inactive) appearance */
+  color:            var(--ai-text-muted);
+  background-color: transparent;
+  cursor:           not-allowed;
+
+  /* Transitions */
+  transition:
+    background-color 150ms ease,
+    color            150ms ease,
+    transform        100ms ease,
+    box-shadow       150ms ease;
+}
+
+/* Active state — has text to send and not loading */
+.sendButtonActive {
+  color:            var(--ai-primary-fg);
+  background-color: var(--ai-primary);
+  cursor:           pointer;
+}
+
+.sendButtonActive:hover {
+  filter:     brightness(1.08);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--ai-primary) 40%, transparent);
+}
+
+.sendButtonActive:active {
+  transform: scale(0.93);
+  filter:    brightness(0.95);
+}
+
+/* Focus ring */
+.sendButton:focus-visible {
+  outline:        2px solid var(--ai-primary);
+  outline-offset: 2px;
+}
+
+/* Disabled */
+.sendButton:disabled {
+  pointer-events: none;
+}
+
+/* ── Spinner animation ────────────────────────────────────────────────────── */
+
+.spinner {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Hint text ────────────────────────────────────────────────────────────── */
+
+.hint {
+  /* Reset */
+  all:        unset;
+  display:    block;
+  box-sizing: border-box;
+
+  /* Layout */
+  padding:    0 0.75rem 0.5rem;
+
+  /* Typography */
+  font-family:  var(--ai-font-sans);
+  font-size:    0.6875rem; /* 11px */
+  line-height:  1.4;
+  color:        var(--ai-text-muted);
+  text-align:   center;
+  user-select:  none;
+}
+
+/* Keyboard key pills */
+.kbd {
+  display:          inline-block;
+  padding:          0.05em 0.35em;
+  font-family:      ui-monospace, "SF Mono", "Cascadia Code", monospace;
+  font-size:        0.6875rem;
+  line-height:      1.5;
+  color:            var(--ai-text-muted);
+  background-color: var(--ai-border);
+  border:           1px solid var(--ai-border);
+  border-radius:    3px;
+  vertical-align:   baseline;
+}
+
+/* ── Screen-reader only utility ───────────────────────────────────────────── */
+
+.srOnly {
+  position:   absolute;
+  width:      1px;
+  height:     1px;
+  padding:    0;
+  margin:     -1px;
+  overflow:   hidden;
+  clip:       rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border:     0;
+}
+
+/* ── Responsive — mobile full-width ──────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .inner {
+    padding: 0.5rem 0.625rem;
+  }
+
+  .hint {
+    /* Hide hint on mobile — space is precious */
+    display: none;
+  }
+
+  .textarea {
+    font-size: 1rem; /* 16px — prevents iOS auto-zoom on focus */
+  }
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .textarea,
+  .sendButton {
+    transition: none;
+  }
+
+  .spinner {
+    animation: none;
+    opacity:   0.6;
+  }
+}

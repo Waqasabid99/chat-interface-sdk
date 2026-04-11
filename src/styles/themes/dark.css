@@ -1,0 +1,5 @@
+/* Dark theme CSS variables */
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+}

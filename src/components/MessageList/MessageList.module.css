@@ -1,0 +1,305 @@
+/**
+ * MessageList.module.css
+ *
+ * Scoped styles for the MessageList component.
+ * All colors reference --ai-* CSS variables from the ChatWidget cascade.
+ *
+ * Layout goals:
+ *  - .root fills all remaining vertical space in the panel (flex: 1 1 0)
+ *  - .scrollArea is the actual overflow container — it clips and scrolls
+ *  - .list is an unstyled <ul> with vertical padding + gap between bubbles
+ *  - .sentinel is a zero-height element at the end of the list used as the
+ *    IntersectionObserver target for scroll-lock detection
+ *  - .scrollPill is the "Latest ↓" button that floats over the list when
+ *    the user has scrolled up
+ */
+
+/* ── Root wrapper ─────────────────────────────────────────────────────────── */
+
+.root {
+  /*
+   * Takes all available height inside the ChatPanel flex column.
+   * flex: 1 1 0 means: grow to fill, shrink if needed, start from 0.
+   * min-height: 0 is required — without it, flex children won't shrink
+   * below their content height, breaking the scroll container.
+   */
+  flex:       1 1 0;
+  min-height: 0;
+  position:   relative; /* stacking context for the scroll pill */
+  display:    flex;
+  flex-direction: column;
+}
+
+/* ── Scrollable area ──────────────────────────────────────────────────────── */
+
+.scrollArea {
+  flex:           1 1 0;
+  min-height:     0;
+  overflow-y:     auto;
+  overflow-x:     hidden;
+
+  /*
+   * Smooth momentum scrolling on iOS.
+   * -webkit-overflow-scrolling: touch is deprecated but still needed for
+   * older iOS (<13) that don't support the native momentum model.
+   */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain; /* prevent scroll chaining to the page */
+
+  /* Custom scrollbar — thin, unobtrusive */
+  scrollbar-width: thin;
+  scrollbar-color: var(--ai-border) transparent;
+}
+
+.scrollArea::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollArea::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollArea::-webkit-scrollbar-thumb {
+  background-color: var(--ai-border);
+  border-radius:    2px;
+}
+.scrollArea::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ai-text-muted);
+}
+
+/* Focus ring for keyboard users scrolling the list */
+.scrollArea:focus-visible {
+  outline:        2px solid var(--ai-primary);
+  outline-offset: -2px;
+}
+
+/* ── Message list <ul> ────────────────────────────────────────────────────── */
+
+.list {
+  /* Reset */
+  list-style:  none;
+  margin:      0;
+  padding:     0;
+
+  /* Layout */
+  display:        flex;
+  flex-direction: column;
+  gap:            1.25rem; /* 20px between bubbles — generous breathing room */
+  padding:        1rem 1rem 0.5rem; /* top/side/bottom internal padding */
+  box-sizing:     border-box;
+  width:          100%;
+}
+
+/* ── List item wrapper ────────────────────────────────────────────────────── */
+
+.listItem {
+  /*
+   * list-style: none on iOS VoiceOver strips the list semantics unless
+   * we keep list-style-type. Setting it explicitly to none on <li> but
+   * keeping role="list" on the <ul> works around this.
+   */
+  list-style: none;
+  display:    block;
+
+  /*
+   * Each listItem adds bottom padding to make room for the absolutely-
+   * positioned timestamp that MessageBubble renders below each bubble.
+   * Without this, the timestamp clips into the next bubble.
+   */
+  padding-bottom: 1.25rem;
+}
+
+/* Last item doesn't need extra bottom padding */
+.listItem:last-child {
+  padding-bottom: 0;
+}
+
+/* ── Sentinel ─────────────────────────────────────────────────────────────── */
+
+.sentinelItem {
+  list-style: none;
+  display:    block;
+  padding:    0;
+  /* A little bottom padding so the last bubble has space before the InputBar */
+  height:     0.75rem;
+}
+
+.sentinel {
+  height:     1px;
+  width:      100%;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ── Empty state ──────────────────────────────────────────────────────────── */
+
+.emptyState {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             0.5rem;
+  height:          100%;
+  padding:         2rem 1.5rem;
+  text-align:      center;
+  color:           var(--ai-text-muted);
+  user-select:     none;
+  pointer-events:  none;
+
+  /* Gentle fade-in */
+  animation: fadeIn 300ms ease both;
+}
+
+.emptyIcon {
+  display:    flex;
+  align-items: center;
+  justify-content: center;
+  width:      56px;
+  height:     56px;
+  border-radius: 50%;
+  background-color: var(--ai-surface);
+  border:     1.5px solid var(--ai-border);
+  color:      var(--ai-text-muted);
+  margin-bottom: 0.25rem;
+
+  /* Subtle pulse to suggest interactivity */
+  animation: emptyPulse 3s ease-in-out infinite;
+}
+
+@keyframes emptyPulse {
+  0%, 100% { box-shadow: 0 0 0 0   color-mix(in srgb, var(--ai-primary) 0%,  transparent); }
+  50%       { box-shadow: 0 0 0 8px color-mix(in srgb, var(--ai-primary) 10%, transparent); }
+}
+
+.emptyText {
+  margin:      0;
+  font-size:   var(--ai-font-size-base);
+  font-weight: 500;
+  color:       var(--ai-text);
+  line-height: 1.4;
+}
+
+.emptySubtext {
+  margin:    0;
+  font-size: var(--ai-font-size-sm);
+  color:     var(--ai-text-muted);
+  line-height: 1.4;
+}
+
+/* ── Scroll-to-bottom pill ────────────────────────────────────────────────── */
+
+.scrollPill {
+  /* Reset */
+  all:        unset;
+  box-sizing: border-box;
+
+  /* Positioning — centred, floating above the list */
+  position:   absolute;
+  bottom:     0.875rem;
+  left:       50%;
+  transform:  translateX(-50%);
+  z-index:    10;
+
+  /* Layout */
+  display:      inline-flex;
+  align-items:  center;
+  gap:          0.3rem;
+
+  /* Typography */
+  font-family:  var(--ai-font-sans);
+  font-size:    var(--ai-font-size-sm);
+  font-weight:  500;
+  color:        var(--ai-text);
+
+  /* Appearance */
+  padding:          0.375rem 0.875rem 0.375rem 0.625rem;
+  background-color: var(--ai-bg);
+  border:           1.5px solid var(--ai-border);
+  border-radius:    999px; /* pill */
+  cursor:           pointer;
+  white-space:      nowrap;
+
+  /* Elevation */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1),
+              0 1px 3px rgba(0, 0, 0, 0.06);
+
+  /* Entry animation */
+  animation: pillIn 180ms cubic-bezier(0.34, 1.3, 0.64, 1) both;
+
+  /* Transitions */
+  transition:
+    background-color 120ms ease,
+    border-color     120ms ease,
+    box-shadow       120ms ease,
+    transform        80ms ease; /* note: translateX(-50%) must be preserved */
+}
+
+.scrollPill:hover {
+  background-color: var(--ai-surface-hover);
+  border-color:     var(--ai-text-muted);
+  box-shadow:       0 4px 12px rgba(0, 0, 0, 0.12),
+                    0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.scrollPill:active {
+  transform: translateX(-50%) scale(0.96);
+}
+
+.scrollPill:focus-visible {
+  outline:        2px solid var(--ai-primary);
+  outline-offset: 2px;
+}
+
+@keyframes pillIn {
+  from {
+    opacity:   0;
+    transform: translateX(-50%) translateY(8px) scale(0.9);
+  }
+  to {
+    opacity:   1;
+    transform: translateX(-50%) translateY(0)   scale(1);
+  }
+}
+
+/* ── Shared fade-in ───────────────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .list {
+    gap:     1rem;
+    padding: 0.75rem 0.75rem 0.5rem;
+  }
+
+  .listItem {
+    padding-bottom: 1rem;
+  }
+
+  .scrollPill {
+    bottom: 0.625rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .emptyState {
+    animation: none;
+  }
+
+  .emptyIcon {
+    animation: none;
+  }
+
+  .scrollPill {
+    animation: none;
+  }
+
+  .scrollArea {
+    scroll-behavior: auto;
+  }
+}

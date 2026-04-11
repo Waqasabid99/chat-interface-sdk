@@ -1,0 +1,4 @@
+/* CSS reset scoped to widget */
+.widget * {
+  box-sizing: border-box;
+}

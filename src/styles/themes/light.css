@@ -1,0 +1,5 @@
+/* Light theme CSS variables */
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+}
