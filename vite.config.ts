@@ -1,11 +1,13 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import dts from 'vite-plugin-dts'
+import { libInjectCss } from 'vite-plugin-lib-inject-css'  // ADD THIS
 import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [
     react(),
+    libInjectCss(),  // ADD THIS - must be before dts()
     dts({ rollupTypes: true, tsconfigPath: './tsconfig.build.json' })
   ],
   build: {
@@ -15,7 +17,6 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'mjs' : 'cjs'}`
     },
     rollupOptions: {
-      // Externalize peer dependencies including the JSX runtime to avoid duplicated React code
       external: ['react', 'react-dom', 'react/jsx-runtime'],
       output: {
         globals: {

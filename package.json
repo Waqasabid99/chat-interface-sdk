@@ -50,7 +50,8 @@
     "README.md"
   ],
   "sideEffects": [
-    "*.css"
+    "*.css",
+    "*.module.css"
   ],
   "peerDependencies": {
     "react": ">=18.0.0",
@@ -111,6 +112,7 @@
     "typescript": "^5.5.4",
     "vite": "^5.4.0",
     "vite-plugin-dts": "^4.0.3",
+    "vite-plugin-lib-inject-css": "^2.2.2",
     "vitest": "^2.0.5"
   },
   "size-limit": [
