@@ -1,3 +1,221 @@
-.indicator {
-  /* Styles for the typing indicator */
+/**
+ * TypingIndicator.module.css
+ *
+ * Scoped styles for the TypingIndicator component.
+ * All colors reference --ai-* CSS variables from the ChatWidget cascade.
+ *
+ * One keyframe (dotBounce) is shared across all variants.
+ * Variant-specific overrides (dot size, color, travel distance, stagger) are
+ * applied via separate .dots* and CSS custom property overrides.
+ *
+ * CSS custom properties scoped to each variant:
+ *   --ti-dot-size     diameter of each dot in px
+ *   --ti-dot-color    fill color
+ *   --ti-travel       vertical travel distance (translateY peak)
+ *   --ti-gap          gap between dots
+ *   --ti-stagger      animation-delay step between dots
+ *   --ti-duration     full bounce cycle duration
+ *
+ * Overriding these on a parent element is a supported customisation path.
+ */
+
+/* ── Shared defaults ──────────────────────────────────────────────────────── */
+
+.root {
+  /* Scope defaults — overridden per variant below */
+  --ti-dot-size:  7px;
+  --ti-dot-color: var(--ai-text-muted);
+  --ti-travel:    6px;
+  --ti-gap:       5px;
+  --ti-stagger:   160ms;
+  --ti-duration:  1.2s;
+
+  display:      inline-flex;
+  align-items:  center;
+  gap:          0.375rem;
+  flex-shrink:  0;
+}
+
+/* ── Variant: bubble (default) ────────────────────────────────────────────── */
+/*
+ * Displayed inside MessageBubble's loading state.
+ * Sits on --ai-assistant-bubble background.
+ * Dots: 7px, muted color, 6px travel.
+ */
+
+.rootBubble {
+  --ti-dot-size:  7px;
+  --ti-dot-color: var(--ai-text-muted);
+  --ti-travel:    6px;
+  --ti-gap:       5px;
+  --ti-stagger:   160ms;
+  --ti-duration:  1.2s;
+}
+
+.dotsBubble {
+  height: 20px; /* fixed height prevents layout shift inside the bubble */
+}
+
+/* ── Variant: inline ──────────────────────────────────────────────────────── */
+/*
+ * Compact — used in ChatHeader status line.
+ * Dots: 4px, primary color, 4px travel.
+ * Rendered beside a "Typing…" label.
+ */
+
+.rootInline {
+  --ti-dot-size:  4px;
+  --ti-dot-color: var(--ai-primary);
+  --ti-travel:    4px;
+  --ti-gap:       3px;
+  --ti-stagger:   140ms;
+  --ti-duration:  1.2s;
+
+  gap: 0.25rem; /* tighter gap between dot group and label */
+}
+
+.dotsInline {
+  height: 14px;
+}
+
+/* ── Variant: standalone ──────────────────────────────────────────────────── */
+/*
+ * Full centered block — for embedding outside the widget.
+ * Dots: 8px, primary color, 7px travel.
+ * Includes a caption below the dots.
+ */
+
+.rootStandalone {
+  --ti-dot-size:  8px;
+  --ti-dot-color: var(--ai-primary);
+  --ti-travel:    7px;
+  --ti-gap:       6px;
+  --ti-stagger:   160ms;
+  --ti-duration:  1.2s;
+
+  flex-direction: column;
+  align-items:    center;
+  gap:            0.75rem;
+  padding:        1.5rem;
+}
+
+.dotsStandalone {
+  height: 22px;
+}
+
+/* ── Dot group ────────────────────────────────────────────────────────────── */
+
+.dots {
+  display:     inline-flex;
+  align-items: center;
+  gap:         var(--ti-gap);
+}
+
+/* ── Individual dot ───────────────────────────────────────────────────────── */
+
+.dot {
+  display:          inline-block;
+  width:            var(--ti-dot-size);
+  height:           var(--ti-dot-size);
+  border-radius:    50%;
+  background-color: var(--ti-dot-color);
+  flex-shrink:      0;
+
+  animation:
+    dotBounce
+    var(--ti-duration)
+    ease-in-out
+    infinite
+    both;
+}
+
+/* Staggered delays — each dot starts after the previous */
+.dot1 { animation-delay: 0ms; }
+.dot2 { animation-delay: var(--ti-stagger); }
+.dot3 { animation-delay: calc(var(--ti-stagger) * 2); }
+
+/* ── Shared bounce keyframe ───────────────────────────────────────────────── */
+
+@keyframes dotBounce {
+  /*
+   * Shape: resting → up → resting
+   *   0%        dim, at baseline
+   *   40%       bright, at peak (--ti-travel)
+   *   80%–100%  dim, back at baseline
+   *
+   * The 80% → 100% hold at the resting position creates a natural pause
+   * between bounces so the wave doesn't feel frantic.
+   */
+  0% {
+    transform: translateY(0);
+    opacity:   0.4;
+  }
+  40% {
+    transform: translateY(calc(var(--ti-travel) * -1));
+    opacity:   1;
+  }
+  80%, 100% {
+    transform: translateY(0);
+    opacity:   0.4;
+  }
+}
+
+/* ── Inline label text ────────────────────────────────────────────────────── */
+
+.inlineLabel {
+  font-family:  var(--ai-font-sans);
+  font-size:    0.6875rem; /* 11px — matches ChatHeader status line */
+  font-style:   italic;
+  line-height:  1;
+  color:        var(--ai-text-muted);
+  white-space:  nowrap;
+  user-select:  none;
+}
+
+/* ── Standalone caption ───────────────────────────────────────────────────── */
+
+.caption {
+  font-family:  var(--ai-font-sans);
+  font-size:    var(--ai-font-size-sm);  /* 13px */
+  line-height:  1.4;
+  color:        var(--ai-text-muted);
+  text-align:   center;
+  user-select:  none;
+
+  /* Gentle fade-in so caption doesn't flash on mount */
+  animation: captionFadeIn 400ms ease both;
+  animation-delay: 300ms; /* delay so it appears after dots start moving */
+}
+
+@keyframes captionFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * Freeze dots at a mid-opacity resting state.
+   * The indicator is still visible — the user understands loading is happening —
+   * but no motion occurs. The dots are staggered in opacity to hint at the
+   * three-dot nature without animation.
+   */
+  .dot1 {
+    animation: none;
+    opacity:   0.9;
+  }
+  .dot2 {
+    animation: none;
+    opacity:   0.55;
+  }
+  .dot3 {
+    animation: none;
+    opacity:   0.25;
+  }
+
+  .caption {
+    animation: none;
+    opacity:   1;
+  }
 }

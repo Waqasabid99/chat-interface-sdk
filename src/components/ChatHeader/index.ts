@@ -1,1 +1,2 @@
-export { ChatHeader } from './ChatHeader'
+export { ChatHeader } from "./ChatHeader";
+export type { ChatHeaderProps } from "./ChatHeader";

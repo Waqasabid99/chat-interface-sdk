@@ -37,6 +37,38 @@ export function useChat({
     async (stream: ReadableStream, assistantId: string) => {
       const reader = stream.getReader();
       const decoder = new TextDecoder();
+      let buffer = "";
+
+      const getChunkText = (line: string) => {
+        const trimmed = line.trim();
+        if (!trimmed) return "";
+
+        const jsonText = trimmed.startsWith("data:")
+          ? trimmed.replace(/^data:\s*/, "")
+          : trimmed;
+
+        try {
+          const parsed = JSON.parse(jsonText);
+          return (
+            (typeof parsed?.message?.content === "string" && parsed.message.content) ||
+            (typeof parsed?.content === "string" && parsed.content) ||
+            ""
+          );
+        } catch {
+          return line;
+        }
+      };
+
+      const appendToAssistant = (text: string) => {
+        if (!text) return;
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId
+              ? { ...m, content: m.content + text }
+              : m
+          )
+        );
+      };
 
       // Mark the placeholder message as streaming
       setMessages((prev) =>
@@ -51,27 +83,23 @@ export function useChat({
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
 
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId
-                ? { ...m, content: m.content + chunk }
-                : m
-            )
-          );
+          const lines = buffer.split(/\r?\n/);
+          buffer = lines.pop() ?? "";
+
+          let contentToAppend = "";
+          for (const line of lines) {
+            contentToAppend += getChunkText(line);
+          }
+
+          appendToAssistant(contentToAppend);
         }
 
-        // Flush any remaining bytes in the decoder
         const tail = decoder.decode();
-        if (tail) {
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId
-                ? { ...m, content: m.content + tail }
-                : m
-            )
-          );
-        }
+        buffer += tail;
+        const finalText = getChunkText(buffer);
+        appendToAssistant(finalText);
 
         // Mark as done
         setMessages((prev) =>
@@ -80,6 +108,7 @@ export function useChat({
           )
         );
       } catch (streamError) {
+        console.log(streamError)
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantId
@@ -162,7 +191,7 @@ export function useChat({
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Something went wrong.";
-
+        console.log(err)
         setError(message);
 
         // Mark the assistant placeholder as an error bubble

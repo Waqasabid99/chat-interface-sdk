@@ -26,6 +26,7 @@ import React, { memo, useCallback } from "react";
 import { cn } from "../../utils/cn";
 import type { Message } from "../../types";
 import styles from "./MessageBubble.module.css";
+import { TypingIndicator } from "../TypingIndicator";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -51,17 +52,6 @@ function formatTime(date: Date): string {
     minute: "2-digit",
   });
 }
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-/** Animated three-dot typing indicator shown while status="loading" */
-const TypingDots: React.FC = () => (
-  <span className={styles.typingDots} aria-label="Thinking…" role="status">
-    <span className={styles.dot} />
-    <span className={styles.dot} />
-    <span className={styles.dot} />
-  </span>
-);
 
 /** Blinking cursor appended to streaming content */
 const StreamCursor: React.FC = () => (
@@ -133,7 +123,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
     const renderContent = () => {
       // Loading: show typing dots instead of (empty) content
       if (isLoading) {
-        return <TypingDots />;
+        return <TypingIndicator variant="bubble" />;
       }
 
       // Error: error icon + message text + retry button

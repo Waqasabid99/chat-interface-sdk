@@ -1,3 +1,278 @@
+/**
+ * ChatPanel.module.css
+ *
+ * Scoped styles for the ChatPanel component.
+ * All colors reference --ai-* CSS variables from the ChatWidget cascade.
+ *
+ * Layout:
+ *   .panel  (flex column, fixed size from --ai-panel-width / --ai-panel-height)
+ *   ├── ChatHeader   (flex-shrink: 0, intrinsic height ~64px)
+ *   ├── MessageList  (flex: 1 1 0, scrolls internally)
+ *   └── InputBar     (flex-shrink: 0, grows up to 5 lines)
+ *
+ * Animation strategy:
+ *   Two classes are toggled by the component's isClosing state:
+ *     .opening → panelIn  keyframe (entry)
+ *     .closing → panelOut keyframe (exit)
+ *
+ *   The CLOSE_DURATION_MS constant in ChatPanel.tsx MUST match the
+ *   animation-duration in .closing below (200ms).
+ *
+ *   Origin is bottom-right by default (matching the widget's default position).
+ *   The widget's position prop shifts the trigger button but the panel's
+ *   transform-origin adapts via the parent's alignment.
+ */
+
+/* ── Panel root ───────────────────────────────────────────────────────────── */
+
 .panel {
-  /* Styles for the chat panel */
+  /* Dimensions — from CSS vars set on ChatWidget root */
+  width:      var(--ai-panel-width,  380px);
+  height:     var(--ai-panel-height, 580px);
+  max-width:  100vw;
+  max-height: 100dvh; /* dynamic viewport height — avoids iOS toolbar clip */
+
+  /* Flex column: header (fixed) / list (grows) / input (fixed) */
+  display:        flex;
+  flex-direction: column;
+  overflow:       hidden; /* children handle their own overflow */
+
+  /* Surface */
+  background-color: var(--ai-bg);
+  border-radius:    var(--ai-radius-lg);
+  border:           1px solid var(--ai-border);
+
+  /* Elevation */
+  box-shadow: var(--ai-shadow-panel,
+    0 20px 60px rgba(0, 0, 0, 0.12),
+    0 4px  16px rgba(0, 0, 0, 0.06)
+  );
+
+  /* Stacking context — above the trigger button */
+  position:   relative;
+  z-index:    var(--ai-z-panel, 10000);
+
+  /* Typography baseline — inherits from ChatWidget root but restated
+     here so the panel works if ever rendered in isolation */
+  font-family:  var(--ai-font-sans);
+  font-size:    var(--ai-font-size-base);
+  line-height:  var(--ai-line-height);
+  color:        var(--ai-text);
+
+  /* Smooth theme transitions */
+  transition:
+    background-color 200ms ease,
+    border-color     200ms ease,
+    box-shadow       200ms ease;
+
+  /* GPU compositing hint — avoids paint during animation */
+  will-change: transform, opacity;
+
+  /* Transform origin: bottom-right corner (where the trigger button sits).
+     This makes the panel appear to grow out of the button on open and
+     shrink back into it on close. */
+  transform-origin: bottom right;
+}
+
+/* ── Entry animation ──────────────────────────────────────────────────────── */
+
+.opening {
+  animation: panelIn 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes panelIn {
+  from {
+    opacity:   0;
+    transform: scale(0.9) translateY(12px);
+  }
+  to {
+    opacity:   1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ── Exit animation ───────────────────────────────────────────────────────── */
+/*
+ * IMPORTANT: animation-duration here (200ms) must stay in sync with
+ * CLOSE_DURATION_MS in ChatPanel.tsx. If you change one, change both.
+ */
+
+.closing {
+  animation: panelOut 200ms cubic-bezier(0.4, 0, 1, 1) both;
+  pointer-events: none; /* prevent interaction during exit animation */
+}
+
+@keyframes panelOut {
+  from {
+    opacity:   1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity:   0;
+    transform: scale(0.92) translateY(10px);
+  }
+}
+
+/* ── Error banner ─────────────────────────────────────────────────────────── */
+
+/*
+ * A slim banner that appears at the very bottom of the panel (above InputBar)
+ * when useChat's error state is non-null. Distinct from the per-bubble error
+ * state in MessageBubble — this is for network-level failures that don't
+ * map to a specific message (e.g. the fetch itself threw before a response).
+ */
+
+.errorBanner {
+  display:        flex;
+  align-items:    center;
+  gap:            0.5rem;
+  padding:        0.5rem 1rem;
+  flex-shrink:    0;
+
+  background-color: var(--ai-error-bg);
+  border-top:       1px solid var(--ai-error-border);
+  color:            var(--ai-error-text);
+
+  font-family:  var(--ai-font-sans);
+  font-size:    var(--ai-font-size-sm);
+  line-height:  1.4;
+
+  /* Slide in from below */
+  animation: bannerIn 180ms ease both;
+}
+
+@keyframes bannerIn {
+  from {
+    opacity:   0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity:   1;
+    transform: translateY(0);
+  }
+}
+
+.errorBannerIcon {
+  flex-shrink:  0;
+  font-size:    0.875rem;
+  line-height:  1;
+  /* Unicode warning sign — no external dependency */
+}
+
+.errorBannerText {
+  flex:        1 1 0;
+  min-width:   0;
+  overflow:    hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.errorBannerDismiss {
+  /* Reset */
+  all:        unset;
+  box-sizing: border-box;
+
+  /* Layout */
+  display:      inline-flex;
+  align-items:  center;
+  flex-shrink:  0;
+  white-space:  nowrap;
+
+  /* Typography */
+  font-family:  var(--ai-font-sans);
+  font-size:    var(--ai-font-size-sm);
+  font-weight:  600;
+  line-height:  1;
+  color:        var(--ai-error-text);
+
+  /* Appearance */
+  padding:          0.25rem 0.625rem;
+  border:           1.5px solid currentColor;
+  border-radius:    calc(var(--ai-radius) * 0.75);
+  cursor:           pointer;
+  background-color: transparent;
+
+  transition:
+    background-color 120ms ease,
+    opacity          120ms ease;
+}
+
+.errorBannerDismiss:hover {
+  background-color: color-mix(in srgb, var(--ai-error-text) 12%, transparent);
+}
+
+.errorBannerDismiss:active {
+  opacity: 0.8;
+}
+
+.errorBannerDismiss:focus-visible {
+  outline:        2px solid var(--ai-error-text);
+  outline-offset: 2px;
+}
+
+/* ── Responsive — full-screen on mobile ───────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .panel {
+    border-radius:  0;
+    border:         none;
+    box-shadow:     none;
+
+    /*
+     * On mobile the panel is full-screen. The ChatWidget positions it with
+     * bottom:0 / left:0 / right:0, so the panel fills the viewport.
+     * We override the fixed width/height here with 100% so it truly fills
+     * its positioned parent rather than relying solely on the CSS vars.
+     */
+    width:      100%;
+    height:     100%;
+    max-height: 100dvh;
+
+    /* Transform origin shifts to bottom-center on mobile since the widget
+       is no longer anchored to a corner */
+    transform-origin: bottom center;
+  }
+
+  .errorBanner {
+    padding: 0.5rem 0.875rem;
+  }
+}
+
+/* ── Tablet ───────────────────────────────────────────────────────────────── */
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .panel {
+    /* Slightly less tall on tablets to avoid covering too much of the page */
+    height: min(var(--ai-panel-height, 580px), 70vh);
+  }
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .opening {
+    animation: none;
+    opacity:   1;
+    transform: none;
+  }
+
+  .closing {
+    animation: none;
+    /*
+     * When reduced motion is requested, we still need to hide the panel.
+     * The JS timer will remove it from the DOM after CLOSE_DURATION_MS,
+     * so we just make it instantly invisible.
+     */
+    opacity:   0;
+    transform: none;
+  }
+
+  .errorBanner {
+    animation: none;
+  }
+
+  .panel {
+    transition:  none;
+    will-change: auto;
+  }
 }

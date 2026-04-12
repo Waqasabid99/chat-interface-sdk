@@ -1,38 +1,126 @@
 {
-  "name": "chat-interface-sdk",
+  "name": "ai-interface",
   "version": "1.0.0",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "description": "Zero-config AI chat widget for React. Drop in <AIInterface />, pass your message handler, get a fully functional streaming chat widget.",
+  "author": "",
+  "license": "MIT",
+  "homepage": "https://github.com/Waqasabid99/chat-interface-sdk.git#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Waqasabid99/chat-interface-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Waqasabid99/chat-interface-sdk.git/issues"
+  },
+  "keywords": [
+    "react",
+    "ai",
+    "chat",
+    "widget",
+    "llm",
+    "streaming",
+    "openai",
+    "claude",
+    "gemini",
+    "chatbot",
+    "chat-ui",
+    "floating-widget",
+    "typescript"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md"
+  ],
+  "sideEffects": ["*.css"],
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react-dom": {
+      "optional": false
     }
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "build:watch": "vite build --watch",
     "preview": "vite preview",
-    "test": "vitest",
-    "lint": "eslint src --ext ts,tsx",
-    "format": "prettier --write src/**/*.{ts,tsx}"
-  },
-  "dependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "type-check": "tsc --noEmit",
+    "type-check:src": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:a11y": "vitest run tests/integration/accessibility.test.tsx",
+    "lint": "eslint src --ext .ts,.tsx --max-warnings 0",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"tests/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"tests/**/*.{ts,tsx}\"",
+    "size": "size-limit",
+    "size:analyze": "size-limit --why",
+    "prepublishOnly": "npm run format:check && npm run lint && npm run type-check && npm run test && npm run build && npm run size",
+    "release": "npm run prepublishOnly && npm publish --access public",
+    "release:dry": "npm pack --dry-run"
   },
   "devDependencies": {
-    "@types/react": "^18.0.0",
-    "@types/react-dom": "^18.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "@vitejs/plugin-react": "^4.0.0",
-    "eslint": "^8.0.0",
-    "jsdom": "^20.0.0",
-    "prettier": "^2.0.0",
-    "typescript": "^5.0.0",
-    "vite": "^4.0.0",
-    "vitest": "^0.30.0"
+    "@size-limit/preset-small-lib": "^11.1.4",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/jest-axe": "^3.5.9",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/coverage-v8": "^2.0.5",
+    "@vitest/ui": "^2.0.5",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.9.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "jest-axe": "^9.0.0",
+    "jsdom": "^25.0.1",
+    "prettier": "^3.3.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "size-limit": "^11.1.4",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0",
+    "vite-plugin-dts": "^4.0.3",
+    "vitest": "^2.0.5"
+  },
+  "size-limit": [
+    {
+      "name": "Full widget (ESM)",
+      "path": "./dist/index.mjs",
+      "limit": "25 KB",
+      "import": "{ ChatWidget }"
+    },
+    {
+      "name": "useChat hook only",
+      "path": "./dist/index.mjs",
+      "limit": "2 KB",
+      "import": "{ useChat }"
+    }
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }
