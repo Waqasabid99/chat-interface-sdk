@@ -160,11 +160,11 @@ export const InputBar: React.FC<InputBarProps> = ({
       role="group"
       aria-label="Message input"
     >
-      {/* ── Divider ── */}
+      {/* ── Top divider ── */}
       <div className={styles.divider} aria-hidden="true" />
 
-      <div className={styles.inner}>
-        {/* ── Textarea ── */}
+      {/* ── Textarea row ── */}
+      <div className={styles.textareaRow}>
         <label htmlFor={inputId} className={styles.srOnly}>
           {placeholder}
         </label>
@@ -182,7 +182,6 @@ export const InputBar: React.FC<InputBarProps> = ({
           aria-label={placeholder}
           aria-disabled={isLoading}
           aria-multiline="true"
-          // Tells screen readers this textarea is part of a live chat
           aria-describedby={isLoading ? `${formId}-loading` : undefined}
           autoComplete="off"
           autoCorrect="on"
@@ -196,8 +195,10 @@ export const InputBar: React.FC<InputBarProps> = ({
             Waiting for response…
           </span>
         )}
+      </div>
 
-        {/* ── Send Button ── */}
+      {/* ── Action bar: send button ── */}
+      <div className={styles.actionBar}>
         <button
           type="button"
           className={cn(styles.sendButton, canSend && styles.sendButtonActive)}
@@ -207,21 +208,9 @@ export const InputBar: React.FC<InputBarProps> = ({
           aria-disabled={!canSend}
           tabIndex={0}
         >
-          {isLoading ? (
-            <LoadingSpinner />
-          ) : (
-            <SendIcon />
-          )}
+          {isLoading ? <LoadingSpinner /> : <SendIcon />}
         </button>
       </div>
-
-      {/* ── Hint text ── */}
-      <p className={styles.hint} aria-hidden="true">
-        Press{" "}
-        <kbd className={styles.kbd}>Enter</kbd> to send,{" "}
-        <kbd className={styles.kbd}>Shift</kbd>+<kbd className={styles.kbd}>Enter</kbd>{" "}
-        for new line
-      </p>
     </div>
   );
 };

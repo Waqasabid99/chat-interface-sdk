@@ -314,6 +314,18 @@
   outline-offset: 2px;
 }
 
+/* ── Back button — navigates to home view ────────────────────────────────── */
+
+.backButton {
+  margin-right: 0.125rem; /* small gap before identity group */
+  flex-shrink:  0;
+}
+
+.backButton:hover {
+  background-color: var(--ai-surface-hover);
+  color:            var(--ai-text);
+}
+
 /* ── Clear button — slightly warmer danger on hover ──────────────────────── */
 
 .clearButton:hover {

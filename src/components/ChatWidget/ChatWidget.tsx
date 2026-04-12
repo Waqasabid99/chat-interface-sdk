@@ -1,22 +1,17 @@
 /**
  * ChatWidget.tsx
- * Root shell component — composes TriggerButton + ChatPanel.
- * Handles open/close state (controlled & uncontrolled), theming,
- * focus management, and keyboard shortcuts.
+ * Root shell — manages views: "home" | "chat" | "help"
  */
 
-"use client"; // Next.js App Router safety
+"use client";
 
-import React, {
-  useCallback,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { ChatPanel } from "../ChatPanel";
 import { TriggerButton } from "../TriggerButton";
+import { WidgetHome } from "../WidgetHome";
+import { WidgetHelp } from "../WidgetHelp";
+import { WidgetArticle } from "../WidgetArticle";
 import { useChat } from "../../hooks/useChat";
 import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { useTheme } from "../../hooks/useTheme";
@@ -24,8 +19,18 @@ import { cn } from "../../utils/cn";
 import { buildCssVars } from "../../utils/cssVars";
 
 import type { OnMessageHandler } from "../../types";
+import type { HelpArticle } from "../WidgetHome";
 
 import styles from "./ChatWidget.module.css";
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+/** Matches CLOSE_DURATION_MS in ChatPanel.tsx */
+const CHAT_CLOSE_MS = 200;
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type WidgetView = "home" | "chat" | "help" | "article";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -39,7 +44,7 @@ export interface ChatWidgetProps {
   /** URL string or React element used as the agent's avatar */
   agentAvatar?: string | React.ReactNode;
 
-  /** Brand logo shown in the widget header */
+  /** Brand logo shown in the widget header and home screen */
   logo?: string | React.ReactNode;
 
   /** Color scheme. "auto" follows system preference. Default: "auto" */
@@ -51,8 +56,47 @@ export interface ChatWidgetProps {
   /** Input field placeholder text */
   placeholder?: string;
 
-  /** First assistant message shown when the panel opens */
+  /**
+   * Large heading shown in the dark home screen header.
+   * Use "\n" for line breaks. Default: "Need support?\nHow can we help?"
+   * Also used as the first assistant message in the chat.
+   */
   welcomeMessage?: string;
+
+  /**
+   * Sub heading shown in the dark home screen header.
+   * Use "\n" for line breaks. Default: "Need support?\nHow can we help?"
+   * Also used as the first assistant message in the chat.
+   */
+  welcomeSubMessage?: string;
+
+  // ─── Home screen content ──────────────────────────────────────────────────
+
+  /** Preview text of the agent's most recent message (shown in home card) */
+  recentMessage?: string;
+
+  /** Human-readable time since the recent message, e.g. "1m" */
+  recentMessageTime?: string;
+
+  /** Status text shown in the status card, e.g. "All Systems Operational" */
+  statusText?: string;
+
+  /** When the status was last updated, e.g. "Updated Apr 12, 08:14 UTC" */
+  statusUpdated?: string;
+
+  /** List of help articles. Requires showHelpArticles=true to display. */
+  helpArticles?: HelpArticle[];
+
+  /**
+   * When true and helpArticles is non-empty, renders the help search section
+   * on the home screen and the Help tab in the bottom nav.
+   */
+  showHelpArticles?: boolean;
+
+  // ─── Layout & control ─────────────────────────────────────────────────────
+
+  /** Which view to start on. Default: "home" */
+  defaultView?: "home" | "chat";
 
   /** External open state (controlled mode) */
   isOpen?: boolean;
@@ -81,17 +125,25 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   primaryColor = "#2563EB",
   placeholder = "Type a message…",
   welcomeMessage,
+  welcomeSubMessage,
+  recentMessage,
+  recentMessageTime,
+  statusText,
+  statusUpdated,
+  helpArticles,
+  showHelpArticles = false,
+  defaultView = "home",
   isOpen: controlledIsOpen,
   onOpenChange,
   position = "bottom-right",
   className,
   style,
 }) => {
-  // ── SSR guard — render nothing on the server ──────────────────────────────
+  // ── SSR guard ─────────────────────────────────────────────────────────────
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // ── Open/close state — supports controlled & uncontrolled ─────────────────
+  // ── Open/close state ──────────────────────────────────────────────────────
   const isControlled = controlledIsOpen !== undefined;
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = isControlled ? controlledIsOpen : internalOpen;
@@ -108,11 +160,85 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   const close = useCallback(() => setOpen(false), [setOpen]);
   const toggle = useCallback(() => setOpen(!isOpen), [isOpen, setOpen]);
 
+  // ── View management ───────────────────────────────────────────────────────
+  const [activeView, setActiveView] = useState<WidgetView>(defaultView);
+  const [chatPanelOpen, setChatPanelOpen] = useState(defaultView === "chat");
+  const [activeArticle, setActiveArticle] = useState<HelpArticle | null>(null);
+  const viewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /** Navigate to the chat view immediately (no delay needed for opening). */
+  const goToChat = useCallback(() => {
+    if (viewTimerRef.current) clearTimeout(viewTimerRef.current);
+    setActiveView("chat");
+    setChatPanelOpen(true);
+  }, []);
+
+  /**
+   * Navigate back to the home view.
+   * First closes ChatPanel (triggering its exit animation), then after the
+   * animation completes switches the view so WidgetHome renders.
+   */
+  const goBack = useCallback(() => {
+    setChatPanelOpen(false);
+    viewTimerRef.current = setTimeout(() => setActiveView("home"), CHAT_CLOSE_MS);
+  }, []);
+
+  /** Navigate to help view — same delayed approach as goBack. */
+  const goToHelp = useCallback(() => {
+    if (viewTimerRef.current) clearTimeout(viewTimerRef.current);
+    if (activeView === "chat") {
+      setChatPanelOpen(false);
+      viewTimerRef.current = setTimeout(() => setActiveView("help"), CHAT_CLOSE_MS);
+    } else {
+      setActiveView("help");
+    }
+  }, [activeView]);
+
+  /** Navigate to single article view. */
+  const goToArticle = useCallback((article: HelpArticle) => {
+    if (viewTimerRef.current) clearTimeout(viewTimerRef.current);
+    setActiveArticle(article);
+    if (activeView === "chat") {
+      setChatPanelOpen(false);
+      viewTimerRef.current = setTimeout(() => setActiveView("article"), CHAT_CLOSE_MS);
+    } else {
+      setActiveView("article");
+    }
+  }, [activeView]);
+
+  /** Navigate back from article view. */
+  const goBackFromArticle = useCallback(() => {
+    setActiveView("home");
+  }, []);
+
+  // Sync view state when widget opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      if (viewTimerRef.current) clearTimeout(viewTimerRef.current);
+      setChatPanelOpen(false);
+    } else if (activeView === "chat") {
+      setChatPanelOpen(true);
+    }
+  }, [isOpen, activeView]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (viewTimerRef.current) clearTimeout(viewTimerRef.current);
+    };
+  }, []);
+
+  // ── Derived visibility flags ──────────────────────────────────────────────
+  const showHome = isOpen && activeView === "home" && !chatPanelOpen;
+  const showHelp = isOpen && activeView === "help" && !chatPanelOpen;
+  const showArticle = isOpen && activeView === "article" && !chatPanelOpen && activeArticle != null;
+  const chatIsOpen = isOpen && chatPanelOpen;
+
   // ── Theming ───────────────────────────────────────────────────────────────
   const resolvedTheme = useTheme(theme);
   const cssVars = buildCssVars({ primaryColor, theme: resolvedTheme });
 
-  // ── Chat state via useChat hook ───────────────────────────────────────────
+  // ── Chat state ────────────────────────────────────────────────────────────
   const { messages, sendMessage, isLoading, error, clearMessages, retryLast } =
     useChat({ onMessage, welcomeMessage });
 
@@ -120,50 +246,84 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
-  useFocusTrap(panelRef, isOpen);
+  useFocusTrap(panelRef, chatIsOpen);
 
-  // Return focus to the trigger when the panel closes
   useEffect(() => {
-    if (!isOpen) {
-      triggerRef.current?.focus();
-    }
+    if (!isOpen) triggerRef.current?.focus();
   }, [isOpen]);
 
   // ── Keyboard shortcuts ────────────────────────────────────────────────────
   useEffect(() => {
     if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        close();
-      }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.preventDefault(); close(); }
     };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
   }, [isOpen, close]);
 
   // ── Accessibility IDs ─────────────────────────────────────────────────────
   const dialogId = useId();
   const dialogLabelId = `${dialogId}-label`;
 
-  // ── SSR: render nothing until hydrated ───────────────────────────────────
   if (!mounted) return null;
 
   return (
     <div
-      className={cn(
-        styles.root,
-        styles[position],
-        className
-      )}
+      className={cn(styles.root, styles[position], className)}
       style={{ ...cssVars, ...style }}
       data-theme={resolvedTheme}
     >
-      {/* ── Chat Panel ── */}
+      {/* ── Home view ── */}
+      {showHome && (
+        <WidgetHome
+          className={styles.panelArea}
+          welcomeMessage={welcomeMessage}
+          welcomeSubMessage={welcomeSubMessage}
+          agentName={agentName}
+          agentAvatar={agentAvatar}
+          logo={logo}
+          recentMessage={recentMessage}
+          recentMessageTime={recentMessageTime}
+          statusText={statusText}
+          statusUpdated={statusUpdated}
+          helpArticles={helpArticles}
+          showHelpArticles={showHelpArticles}
+          onStartChat={goToChat}
+          onShowHelp={goToHelp}
+          onArticleClick={goToArticle}
+          onClose={close}
+        />
+      )}
+
+      {/* ── Help view ── */}
+      {showHelp && helpArticles && helpArticles.length > 0 && (
+        <WidgetHelp
+          className={styles.panelArea}
+          helpArticles={helpArticles}
+          onGoHome={goBack}
+          onStartChat={goToChat}
+          onArticleClick={goToArticle}
+          onClose={close}
+        />
+      )}
+
+      {/* ── Article view ── */}
+      {showArticle && (
+        <WidgetArticle
+          className={styles.panelArea}
+          article={activeArticle!}
+          onBack={goBackFromArticle}
+          onClose={close}
+        />
+      )}
+
+      {/* ── Chat panel ── */}
       <ChatPanel
         ref={panelRef}
-        isOpen={isOpen}
+        isOpen={chatIsOpen}
         onClose={close}
+        onBack={goBack}
         messages={messages}
         isLoading={isLoading}
         error={error}

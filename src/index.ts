@@ -7,6 +7,8 @@ export { MessageBubble } from './components/MessageBubble'
 export { TypingIndicator } from './components/TypingIndicator'
 export { InputBar } from './components/InputBar'
 export { TriggerButton } from './components/TriggerButton'
+export { WidgetHome } from './components/WidgetHome'
+export { WidgetHelp } from './components/WidgetHelp'
 
 export { useChat } from './hooks/useChat'
 export { useScrollAnchor } from './hooks/useScrollAnchor'

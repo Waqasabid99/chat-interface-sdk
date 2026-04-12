@@ -97,6 +97,12 @@ export interface ChatPanelProps {
   placeholder?: string;
 
   /**
+   * When provided, a ← back button appears in the header.
+   * Clicking it navigates back to the home view.
+   */
+  onBack?: () => void;
+
+  /**
    * ID of the dialog element — used by ChatWidget's TriggerButton as
    * aria-controls so the button announces which element it opens.
    */
@@ -129,6 +135,7 @@ export const ChatPanel = forwardRef<HTMLDivElement, ChatPanelProps>(
       agentAvatar,
       logo,
       placeholder,
+      onBack,
       dialogId,
       dialogLabelId,
       className,
@@ -204,6 +211,7 @@ export const ChatPanel = forwardRef<HTMLDivElement, ChatPanelProps>(
           logo={logo}
           isLoading={isLoading}
           onClose={onClose}
+          onBack={onBack}
           onClear={messages.length > 0 ? onClear : undefined}
           dialogLabelId={dialogLabelId}
         />

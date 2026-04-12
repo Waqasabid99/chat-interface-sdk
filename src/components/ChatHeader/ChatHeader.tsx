@@ -57,6 +57,12 @@ export interface ChatHeaderProps {
   onClose: () => void;
 
   /**
+   * When provided, a ← back button is rendered on the far left.
+   * Clicking it navigates back to the home view.
+   */
+  onBack?: () => void;
+
+  /**
    * Clears the message history.
    * When undefined, the clear button is not rendered.
    */
@@ -73,6 +79,25 @@ export interface ChatHeaderProps {
 }
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
+
+/** Left chevron / back icon */
+const BackIcon: React.FC = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 20 20"
+    fill="currentColor"
+    width="18"
+    height="18"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
+    />
+  </svg>
+);
 
 /** X / close icon */
 const CloseIcon: React.FC = () => (
@@ -179,12 +204,26 @@ export const ChatHeader: React.FC<ChatHeaderProps> = memo(
     logo,
     isLoading = false,
     onClose,
+    onBack,
     onClear,
     dialogLabelId,
     className,
   }) => {
     return (
       <header className={cn(styles.root, className)}>
+        {/* ── Back button (optional) ── */}
+        {onBack && (
+          <button
+            type="button"
+            className={cn(styles.iconButton, styles.backButton)}
+            onClick={onBack}
+            aria-label="Go back"
+            title="Go back"
+          >
+            <BackIcon />
+          </button>
+        )}
+
         {/* ── Left group: logo (optional) + avatar + name ── */}
         <div className={styles.identity}>
           {logo && <Logo logo={logo} />}
