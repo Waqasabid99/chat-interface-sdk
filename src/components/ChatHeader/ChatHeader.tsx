@@ -29,53 +29,53 @@
  *   - Status text uses aria-live="polite" + role="status"
  */
 
-import React, { memo, useMemo } from "react";
+import React, { memo, useMemo } from 'react'
 
-import { cn } from "../../utils/cn";
-import styles from "./ChatHeader.module.css";
-import { TypingIndicator } from "../TypingIndicator";
+import { cn } from '../../utils/cn'
+import styles from './ChatHeader.module.css'
+import { TypingIndicator } from '../TypingIndicator'
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 export interface ChatHeaderProps {
   /** Display name of the AI agent */
-  agentName?: string;
+  agentName?: string
 
   /** Avatar: URL string, ReactNode, or undefined (falls back to initials) */
-  agentAvatar?: string | React.ReactNode;
+  agentAvatar?: string | React.ReactNode
 
   /** Optional brand logo — shown left of the agent group */
-  logo?: string | React.ReactNode;
+  logo?: string | React.ReactNode
 
   /**
    * When true, the header shows a live "Typing…" status indicator
    * under the agent name.
    */
-  isLoading?: boolean;
+  isLoading?: boolean
 
   /** Closes the chat panel */
-  onClose: () => void;
+  onClose: () => void
 
   /**
    * When provided, a ← back button is rendered on the far left.
    * Clicking it navigates back to the home view.
    */
-  onBack?: () => void;
+  onBack?: () => void
 
   /**
    * Clears the message history.
    * When undefined, the clear button is not rendered.
    */
-  onClear?: () => void;
+  onClear?: () => void
 
   /**
    * Applied to the agent name <h2>.
    * Must match the aria-labelledby on the dialog element.
    */
-  dialogLabelId?: string;
+  dialogLabelId?: string
 
   /** Extra class on the root <header> element */
-  className?: string;
+  className?: string
 }
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -97,7 +97,7 @@ const BackIcon: React.FC = () => (
       d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
     />
   </svg>
-);
+)
 
 /** X / close icon */
 const CloseIcon: React.FC = () => (
@@ -112,7 +112,7 @@ const CloseIcon: React.FC = () => (
   >
     <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
   </svg>
-);
+)
 
 /** Trash / clear conversation icon */
 const ClearIcon: React.FC = () => (
@@ -131,13 +131,13 @@ const ClearIcon: React.FC = () => (
       clipRule="evenodd"
     />
   </svg>
-);
+)
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
 interface AvatarProps {
-  agentAvatar?: string | React.ReactNode;
-  agentName: string;
+  agentAvatar?: string | React.ReactNode
+  agentName: string
 }
 
 /**
@@ -148,14 +148,14 @@ interface AvatarProps {
  */
 const Avatar: React.FC<AvatarProps> = ({ agentAvatar, agentName }) => {
   const initials = useMemo(() => {
-    const words = agentName.trim().split(/\s+/);
-    if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-    return (words[0][0] + words[1][0]).toUpperCase();
-  }, [agentName]);
+    const words = agentName.trim().split(/\s+/)
+    if (words.length === 1) return words[0].slice(0, 2).toUpperCase()
+    return (words[0][0] + words[1][0]).toUpperCase()
+  }, [agentName])
 
   return (
     <span className={styles.avatar} aria-hidden="true">
-      {typeof agentAvatar === "string" ? (
+      {typeof agentAvatar === 'string' ? (
         <img
           src={agentAvatar}
           alt=""
@@ -171,35 +171,35 @@ const Avatar: React.FC<AvatarProps> = ({ agentAvatar, agentName }) => {
       {/* Online indicator dot */}
       <span className={styles.onlineDot} aria-hidden="true" />
     </span>
-  );
-};
+  )
+}
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
 
 interface LogoProps {
-  logo: string | React.ReactNode;
+  logo: string | React.ReactNode
 }
 
 const Logo: React.FC<LogoProps> = ({ logo }) => {
-  if (typeof logo === "string") {
+  if (typeof logo === 'string') {
     return (
       <span className={styles.logo} aria-hidden="true">
         <img src={logo} alt="" className={styles.logoImg} draggable={false} />
       </span>
-    );
+    )
   }
   return (
     <span className={styles.logo} aria-hidden="true">
       {logo}
     </span>
-  );
-};
+  )
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const ChatHeader: React.FC<ChatHeaderProps> = memo(
   ({
-    agentName = "AI Assistant",
+    agentName = 'AI Assistant',
     agentAvatar,
     logo,
     isLoading = false,
@@ -287,8 +287,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = memo(
         {/* ── Bottom border ── */}
         <div className={styles.divider} aria-hidden="true" />
       </header>
-    );
+    )
   }
-);
+)
 
-ChatHeader.displayName = "ChatHeader";
+ChatHeader.displayName = 'ChatHeader'

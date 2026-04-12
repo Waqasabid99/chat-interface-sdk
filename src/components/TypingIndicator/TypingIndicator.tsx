@@ -36,14 +36,14 @@
  *   Stagger:  0ms / staggerMs / staggerMs*2
  */
 
-import React, { memo } from "react";
+import React, { memo } from 'react'
 
-import { cn } from "../../utils/cn";
-import styles from "./TypingIndicator.module.css";
+import { cn } from '../../utils/cn'
+import styles from './TypingIndicator.module.css'
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
-export type TypingIndicatorVariant = "bubble" | "inline" | "standalone";
+export type TypingIndicatorVariant = 'bubble' | 'inline' | 'standalone'
 
 export interface TypingIndicatorProps {
   /**
@@ -52,7 +52,7 @@ export interface TypingIndicatorProps {
    * - "inline"     → compact, for ChatHeader status line
    * - "standalone" → centered block with text label
    */
-  variant?: TypingIndicatorVariant;
+  variant?: TypingIndicatorVariant
 
   /**
    * Accessible label announced by screen readers.
@@ -60,48 +60,43 @@ export interface TypingIndicatorProps {
    *   bubble / standalone → "Thinking…"
    *   inline              → "Assistant is typing"
    */
-  label?: string;
+  label?: string
 
   /**
    * Text shown below the dots in the "standalone" variant only.
    * Defaults to the label value.
    */
-  caption?: string;
+  caption?: string
 
   /** Extra class on the root element */
-  className?: string;
+  className?: string
 }
 
 // ─── Default labels per variant ──────────────────────────────────────────────
 
 const DEFAULT_LABELS: Record<TypingIndicatorVariant, string> = {
-  bubble:     "Thinking…",
-  inline:     "Assistant is typing",
-  standalone: "Thinking…",
-};
+  bubble: 'Thinking…',
+  inline: 'Assistant is typing',
+  standalone: 'Thinking…',
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const TypingIndicator: React.FC<TypingIndicatorProps> = memo(
-  ({
-    variant = "bubble",
-    label,
-    caption,
-    className,
-  }) => {
-    const resolvedLabel   = label   ?? DEFAULT_LABELS[variant];
-    const resolvedCaption = caption ?? resolvedLabel;
+  ({ variant = 'bubble', label, caption, className }) => {
+    const resolvedLabel = label ?? DEFAULT_LABELS[variant]
+    const resolvedCaption = caption ?? resolvedLabel
 
-    const isBubble     = variant === "bubble";
-    const isInline     = variant === "inline";
-    const isStandalone = variant === "standalone";
+    const isBubble = variant === 'bubble'
+    const isInline = variant === 'inline'
+    const isStandalone = variant === 'standalone'
 
     return (
       <span
         className={cn(
           styles.root,
-          isBubble     && styles.rootBubble,
-          isInline     && styles.rootInline,
+          isBubble && styles.rootBubble,
+          isInline && styles.rootInline,
           isStandalone && styles.rootStandalone,
           className
         )}
@@ -113,8 +108,8 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = memo(
         <span
           className={cn(
             styles.dots,
-            isBubble     && styles.dotsBubble,
-            isInline     && styles.dotsInline,
+            isBubble && styles.dotsBubble,
+            isInline && styles.dotsInline,
             isStandalone && styles.dotsStandalone
           )}
           aria-hidden="true"
@@ -143,8 +138,8 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = memo(
           </span>
         )}
       </span>
-    );
+    )
   }
-);
+)
 
-TypingIndicator.displayName = "TypingIndicator";
+TypingIndicator.displayName = 'TypingIndicator'

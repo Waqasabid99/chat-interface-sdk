@@ -15,50 +15,44 @@
  *  - Fully keyboard and screen-reader accessible
  */
 
-import React, {
-  useCallback,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react'
 
-import { cn } from "../../utils/cn";
-import styles from "./InputBar.module.css";
+import { cn } from '../../utils/cn'
+import styles from './InputBar.module.css'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 /** Line-height used for auto-resize calculation (matches CSS). */
-const LINE_HEIGHT_PX = 22;
+const LINE_HEIGHT_PX = 22
 
 /** Vertical padding inside the textarea (top + bottom, matches CSS). */
-const TEXTAREA_PADDING_V = 20; // 10px top + 10px bottom
+const TEXTAREA_PADDING_V = 20 // 10px top + 10px bottom
 
 /** Maximum number of visible lines before the textarea becomes scrollable. */
-const MAX_ROWS = 5;
+const MAX_ROWS = 5
 
-const MAX_HEIGHT_PX = LINE_HEIGHT_PX * MAX_ROWS + TEXTAREA_PADDING_V;
+const MAX_HEIGHT_PX = LINE_HEIGHT_PX * MAX_ROWS + TEXTAREA_PADDING_V
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 export interface InputBarProps {
   /** Called when the user submits a non-empty message. */
-  onSend: (text: string) => void;
+  onSend: (text: string) => void
 
   /** When true, textarea and send button are disabled. */
-  isLoading?: boolean;
+  isLoading?: boolean
 
   /** Placeholder text shown in the textarea. */
-  placeholder?: string;
+  placeholder?: string
 
   /**
    * When true, the textarea receives focus as soon as the component mounts.
    * Pass `true` whenever the chat panel opens.
    */
-  autoFocus?: boolean;
+  autoFocus?: boolean
 
   /** Extra class applied to the root wrapper. */
-  className?: string;
+  className?: string
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -66,13 +60,13 @@ export interface InputBarProps {
 export const InputBar: React.FC<InputBarProps> = ({
   onSend,
   isLoading = false,
-  placeholder = "Type a message…",
+  placeholder = 'Type a message…',
   autoFocus = false,
   className,
 }) => {
-  const [value, setValue] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const formId = useId();
+  const [value, setValue] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const formId = useId()
 
   // ── Auto-resize logic ─────────────────────────────────────────────────────
 
@@ -82,26 +76,25 @@ export const InputBar: React.FC<InputBarProps> = ({
    * content height without being constrained by the current element height.
    */
   const syncHeight = useCallback(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT_PX)}px`;
-    el.style.overflowY =
-      el.scrollHeight > MAX_HEIGHT_PX ? "auto" : "hidden";
-  }, []);
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT_PX)}px`
+    el.style.overflowY = el.scrollHeight > MAX_HEIGHT_PX ? 'auto' : 'hidden'
+  }, [])
 
   /** Reset height to single-line after sending. */
   const resetHeight = useCallback(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.overflowY = "hidden";
-  }, []);
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.overflowY = 'hidden'
+  }, [])
 
   // Sync height whenever value changes
   useEffect(() => {
-    syncHeight();
-  }, [value, syncHeight]);
+    syncHeight()
+  }, [value, syncHeight])
 
   // ── Autofocus ─────────────────────────────────────────────────────────────
 
@@ -110,49 +103,49 @@ export const InputBar: React.FC<InputBarProps> = ({
       // rAF ensures the panel's open animation has started before we focus,
       // preventing a layout jump on the first render.
       const raf = requestAnimationFrame(() => {
-        textareaRef.current?.focus();
-      });
-      return () => cancelAnimationFrame(raf);
+        textareaRef.current?.focus()
+      })
+      return () => cancelAnimationFrame(raf)
     }
-  }, [autoFocus]);
+  }, [autoFocus])
 
   // Re-focus the textarea once a loading response completes so the user can
   // immediately type their next message without clicking.
-  const prevLoading = useRef(isLoading);
+  const prevLoading = useRef(isLoading)
   useEffect(() => {
     if (prevLoading.current && !isLoading) {
-      textareaRef.current?.focus();
+      textareaRef.current?.focus()
     }
-    prevLoading.current = isLoading;
-  }, [isLoading]);
+    prevLoading.current = isLoading
+  }, [isLoading])
 
   // ── Send handler ──────────────────────────────────────────────────────────
 
   const handleSend = useCallback(() => {
-    const trimmed = value.trim();
-    if (!trimmed || isLoading) return;
-    onSend(trimmed);
-    setValue("");
-    resetHeight();
-  }, [value, isLoading, onSend, resetHeight]);
+    const trimmed = value.trim()
+    if (!trimmed || isLoading) return
+    onSend(trimmed)
+    setValue('')
+    resetHeight()
+  }, [value, isLoading, onSend, resetHeight])
 
   // ── Keyboard handler ──────────────────────────────────────────────────────
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault(); // prevent bare newline
-        handleSend();
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault() // prevent bare newline
+        handleSend()
       }
       // Shift+Enter falls through naturally — browser inserts \n
     },
     [handleSend]
-  );
+  )
 
   // ── Derived state ─────────────────────────────────────────────────────────
 
-  const canSend = value.trim().length > 0 && !isLoading;
-  const inputId = `${formId}-input`;
+  const canSend = value.trim().length > 0 && !isLoading
+  const inputId = `${formId}-input`
 
   return (
     <div
@@ -191,7 +184,11 @@ export const InputBar: React.FC<InputBarProps> = ({
 
         {/* Hidden loading description for screen readers */}
         {isLoading && (
-          <span id={`${formId}-loading`} className={styles.srOnly} aria-live="polite">
+          <span
+            id={`${formId}-loading`}
+            className={styles.srOnly}
+            aria-live="polite"
+          >
             Waiting for response…
           </span>
         )}
@@ -212,10 +209,10 @@ export const InputBar: React.FC<InputBarProps> = ({
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-InputBar.displayName = "InputBar";
+InputBar.displayName = 'InputBar'
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -235,7 +232,7 @@ const SendIcon: React.FC = () => (
     */}
     <path d="M3.478 2.405a.75.75 0 0 0-.926.94l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.405Z" />
   </svg>
-);
+)
 
 const LoadingSpinner: React.FC = () => (
   <svg
@@ -258,4 +255,4 @@ const LoadingSpinner: React.FC = () => (
       strokeDasharray="40 20"
     />
   </svg>
-);
+)

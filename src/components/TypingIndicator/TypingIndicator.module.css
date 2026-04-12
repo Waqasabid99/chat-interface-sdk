@@ -23,17 +23,17 @@
 
 .root {
   /* Scope defaults — overridden per variant below */
-  --ti-dot-size:  7px;
+  --ti-dot-size: 7px;
   --ti-dot-color: var(--ai-text-muted);
-  --ti-travel:    6px;
-  --ti-gap:       5px;
-  --ti-stagger:   160ms;
-  --ti-duration:  1.2s;
+  --ti-travel: 6px;
+  --ti-gap: 5px;
+  --ti-stagger: 160ms;
+  --ti-duration: 1.2s;
 
-  display:      inline-flex;
-  align-items:  center;
-  gap:          0.375rem;
-  flex-shrink:  0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
 }
 
 /* ── Variant: bubble (default) ────────────────────────────────────────────── */
@@ -44,12 +44,12 @@
  */
 
 .rootBubble {
-  --ti-dot-size:  7px;
+  --ti-dot-size: 7px;
   --ti-dot-color: var(--ai-text-muted);
-  --ti-travel:    6px;
-  --ti-gap:       5px;
-  --ti-stagger:   160ms;
-  --ti-duration:  1.2s;
+  --ti-travel: 6px;
+  --ti-gap: 5px;
+  --ti-stagger: 160ms;
+  --ti-duration: 1.2s;
 }
 
 .dotsBubble {
@@ -64,12 +64,12 @@
  */
 
 .rootInline {
-  --ti-dot-size:  4px;
+  --ti-dot-size: 4px;
   --ti-dot-color: var(--ai-primary);
-  --ti-travel:    4px;
-  --ti-gap:       3px;
-  --ti-stagger:   140ms;
-  --ti-duration:  1.2s;
+  --ti-travel: 4px;
+  --ti-gap: 3px;
+  --ti-stagger: 140ms;
+  --ti-duration: 1.2s;
 
   gap: 0.25rem; /* tighter gap between dot group and label */
 }
@@ -86,17 +86,17 @@
  */
 
 .rootStandalone {
-  --ti-dot-size:  8px;
+  --ti-dot-size: 8px;
   --ti-dot-color: var(--ai-primary);
-  --ti-travel:    7px;
-  --ti-gap:       6px;
-  --ti-stagger:   160ms;
-  --ti-duration:  1.2s;
+  --ti-travel: 7px;
+  --ti-gap: 6px;
+  --ti-stagger: 160ms;
+  --ti-duration: 1.2s;
 
   flex-direction: column;
-  align-items:    center;
-  gap:            0.75rem;
-  padding:        1.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
 }
 
 .dotsStandalone {
@@ -106,33 +106,34 @@
 /* ── Dot group ────────────────────────────────────────────────────────────── */
 
 .dots {
-  display:     inline-flex;
+  display: inline-flex;
   align-items: center;
-  gap:         var(--ti-gap);
+  gap: var(--ti-gap);
 }
 
 /* ── Individual dot ───────────────────────────────────────────────────────── */
 
 .dot {
-  display:          inline-block;
-  width:            var(--ti-dot-size);
-  height:           var(--ti-dot-size);
-  border-radius:    50%;
+  display: inline-block;
+  width: var(--ti-dot-size);
+  height: var(--ti-dot-size);
+  border-radius: 50%;
   background-color: var(--ti-dot-color);
-  flex-shrink:      0;
+  flex-shrink: 0;
 
-  animation:
-    dotBounce
-    var(--ti-duration)
-    ease-in-out
-    infinite
-    both;
+  animation: dotBounce var(--ti-duration) ease-in-out infinite both;
 }
 
 /* Staggered delays — each dot starts after the previous */
-.dot1 { animation-delay: 0ms; }
-.dot2 { animation-delay: var(--ti-stagger); }
-.dot3 { animation-delay: calc(var(--ti-stagger) * 2); }
+.dot1 {
+  animation-delay: 0ms;
+}
+.dot2 {
+  animation-delay: var(--ti-stagger);
+}
+.dot3 {
+  animation-delay: calc(var(--ti-stagger) * 2);
+}
 
 /* ── Shared bounce keyframe ───────────────────────────────────────────────── */
 
@@ -148,39 +149,40 @@
    */
   0% {
     transform: translateY(0);
-    opacity:   0.4;
+    opacity: 0.4;
   }
   40% {
     transform: translateY(calc(var(--ti-travel) * -1));
-    opacity:   1;
+    opacity: 1;
   }
-  80%, 100% {
+  80%,
+  100% {
     transform: translateY(0);
-    opacity:   0.4;
+    opacity: 0.4;
   }
 }
 
 /* ── Inline label text ────────────────────────────────────────────────────── */
 
 .inlineLabel {
-  font-family:  var(--ai-font-sans);
-  font-size:    0.6875rem; /* 11px — matches ChatHeader status line */
-  font-style:   italic;
-  line-height:  1;
-  color:        var(--ai-text-muted);
-  white-space:  nowrap;
-  user-select:  none;
+  font-family: var(--ai-font-sans);
+  font-size: 0.6875rem; /* 11px — matches ChatHeader status line */
+  font-style: italic;
+  line-height: 1;
+  color: var(--ai-text-muted);
+  white-space: nowrap;
+  user-select: none;
 }
 
 /* ── Standalone caption ───────────────────────────────────────────────────── */
 
 .caption {
-  font-family:  var(--ai-font-sans);
-  font-size:    var(--ai-font-size-sm);  /* 13px */
-  line-height:  1.4;
-  color:        var(--ai-text-muted);
-  text-align:   center;
-  user-select:  none;
+  font-family: var(--ai-font-sans);
+  font-size: var(--ai-font-size-sm); /* 13px */
+  line-height: 1.4;
+  color: var(--ai-text-muted);
+  text-align: center;
+  user-select: none;
 
   /* Gentle fade-in so caption doesn't flash on mount */
   animation: captionFadeIn 400ms ease both;
@@ -188,8 +190,12 @@
 }
 
 @keyframes captionFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* ── Reduced motion ───────────────────────────────────────────────────────── */
@@ -203,19 +209,19 @@
    */
   .dot1 {
     animation: none;
-    opacity:   0.9;
+    opacity: 0.9;
   }
   .dot2 {
     animation: none;
-    opacity:   0.55;
+    opacity: 0.55;
   }
   .dot3 {
     animation: none;
-    opacity:   0.25;
+    opacity: 0.25;
   }
 
   .caption {
     animation: none;
-    opacity:   1;
+    opacity: 1;
   }
 }

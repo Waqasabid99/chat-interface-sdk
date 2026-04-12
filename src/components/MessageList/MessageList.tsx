@@ -31,26 +31,26 @@ import React, {
   useLayoutEffect,
   useRef,
   useState,
-} from "react";
+} from 'react'
 
-import { MessageBubble } from "../MessageBubble";
-import { cn } from "../../utils/cn";
-import type { Message } from "../../types";
-import styles from "./MessageList.module.css";
+import { MessageBubble } from '../MessageBubble'
+import { cn } from '../../utils/cn'
+import type { Message } from '../../types'
+import styles from './MessageList.module.css'
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 export interface MessageListProps {
-  messages: Message[];
+  messages: Message[]
 
   /**
    * Passed down to every error-status assistant bubble.
    * Triggers retryLast() from useChat.
    */
-  onRetry?: () => void;
+  onRetry?: () => void
 
   /** Extra class applied to the scrollable root element. */
-  className?: string;
+  className?: string
 }
 
 // ─── Scroll-to-bottom button ──────────────────────────────────────────────────
@@ -71,7 +71,7 @@ const ChevronDownIcon: React.FC = () => (
       clipRule="evenodd"
     />
   </svg>
-);
+)
 
 // ─── Empty state ──────────────────────────────────────────────────────────────
 
@@ -97,50 +97,53 @@ const EmptyState: React.FC = () => (
     <p className={styles.emptyText}>Start the conversation</p>
     <p className={styles.emptySubtext}>Send a message to get started</p>
   </div>
-);
+)
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const MessageList: React.FC<MessageListProps> = memo(
   ({ messages, onRetry, className }) => {
-    const scrollRootRef = useRef<HTMLDivElement>(null);
-    const sentinelRef   = useRef<HTMLDivElement>(null);
+    const scrollRootRef = useRef<HTMLDivElement>(null)
+    const sentinelRef = useRef<HTMLDivElement>(null)
 
     /**
      * userScrolledUp === true  → user has scrolled up; do NOT auto-scroll
      * userScrolledUp === false → user is at (or near) the bottom; DO auto-scroll
      */
-    const [userScrolledUp, setUserScrolledUp] = useState(false);
+    const [userScrolledUp, setUserScrolledUp] = useState(false)
 
     // Tracks the previous message count so we can detect new arrivals
-    const prevCountRef = useRef(messages.length);
+    const prevCountRef = useRef(messages.length)
 
     // ── IntersectionObserver — watches the sentinel ─────────────────────────
     useEffect(() => {
-      const sentinel = sentinelRef.current;
-      if (!sentinel) return;
+      const sentinel = sentinelRef.current
+      if (!sentinel) return
 
       const observer = new IntersectionObserver(
         ([entry]) => {
           // sentinel visible  → user is at the bottom → release scroll lock
           // sentinel invisible → user scrolled up      → engage scroll lock
-          setUserScrolledUp(!entry.isIntersecting);
+          setUserScrolledUp(!entry.isIntersecting)
         },
         {
-          root:      scrollRootRef.current,
+          root: scrollRootRef.current,
           threshold: 0.1, // 10% of the sentinel must be visible to count
         }
-      );
+      )
 
-      observer.observe(sentinel);
-      return () => observer.disconnect();
-    }, []);
+      observer.observe(sentinel)
+      return () => observer.disconnect()
+    }, [])
 
     // ── Auto-scroll helper ──────────────────────────────────────────────────
 
-    const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
-      sentinelRef.current?.scrollIntoView({ behavior, block: "nearest" });
-    }, []);
+    const scrollToBottom = useCallback(
+      (behavior: ScrollBehavior = 'smooth') => {
+        sentinelRef.current?.scrollIntoView({ behavior, block: 'nearest' })
+      },
+      []
+    )
 
     /**
      * Scroll on new message arrival OR on streaming chunk updates.
@@ -154,42 +157,42 @@ export const MessageList: React.FC<MessageListProps> = memo(
      *  2. Last message is streaming/loading → scroll each chunk (unless user scrolled up)
      */
     useLayoutEffect(() => {
-      if (userScrolledUp) return;
+      if (userScrolledUp) return
 
-      const currentCount = messages.length;
-      const lastMsg      = messages[messages.length - 1];
+      const currentCount = messages.length
+      const lastMsg = messages[messages.length - 1]
 
-      const isNewMessage   = currentCount > prevCountRef.current;
-      const isLiveUpdate   =
-        lastMsg?.status === "streaming" || lastMsg?.status === "loading";
+      const isNewMessage = currentCount > prevCountRef.current
+      const isLiveUpdate =
+        lastMsg?.status === 'streaming' || lastMsg?.status === 'loading'
 
       if (isNewMessage || isLiveUpdate) {
-        scrollToBottom("smooth");
+        scrollToBottom('smooth')
       }
 
-      prevCountRef.current = currentCount;
-    }, [messages, userScrolledUp, scrollToBottom]);
+      prevCountRef.current = currentCount
+    }, [messages, userScrolledUp, scrollToBottom])
 
     /**
      * When the panel first mounts (or messages are cleared and a welcome
      * message loads), snap instantly to the bottom without animation.
      */
     useLayoutEffect(() => {
-      scrollToBottom("instant" as ScrollBehavior);
+      scrollToBottom('instant' as ScrollBehavior)
       // Only run on mount
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [])
 
     // ── Scroll-to-bottom button handler ────────────────────────────────────
 
     const handleScrollToBottom = useCallback(() => {
-      scrollToBottom("smooth");
+      scrollToBottom('smooth')
       // Release lock immediately on explicit user action — the IntersectionObserver
       // will confirm and keep it released once the sentinel comes into view
-      setUserScrolledUp(false);
-    }, [scrollToBottom]);
+      setUserScrolledUp(false)
+    }, [scrollToBottom])
 
-    const isEmpty = messages.length === 0;
+    const isEmpty = messages.length === 0
 
     return (
       <div className={cn(styles.root, className)}>
@@ -216,7 +219,7 @@ export const MessageList: React.FC<MessageListProps> = memo(
                   <MessageBubble
                     message={message}
                     onRetry={
-                      message.role === "assistant" && message.status === "error"
+                      message.role === 'assistant' && message.status === 'error'
                         ? onRetry
                         : undefined
                     }
@@ -245,8 +248,8 @@ export const MessageList: React.FC<MessageListProps> = memo(
           </button>
         )}
       </div>
-    );
+    )
   }
-);
+)
 
-MessageList.displayName = "MessageList";
+MessageList.displayName = 'MessageList'

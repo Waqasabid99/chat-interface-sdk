@@ -417,7 +417,9 @@
   padding: 0.6875rem 0.875rem;
   cursor: pointer;
   color: var(--ai-text-muted);
-  transition: background-color 130ms ease, color 130ms ease;
+  transition:
+    background-color 130ms ease,
+    color 130ms ease;
   box-sizing: border-box;
   width: 100%;
   border-bottom: 1px solid var(--ai-border);
@@ -531,7 +533,9 @@
   cursor: pointer;
   color: var(--ai-text-muted);
   font-family: var(--ai-font-sans);
-  transition: color 150ms ease, background-color 130ms ease;
+  transition:
+    color 150ms ease,
+    background-color 130ms ease;
   box-sizing: border-box;
   border-radius: 0;
 }

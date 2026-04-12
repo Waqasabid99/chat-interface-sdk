@@ -1,2 +1,2 @@
-export { InputBar } from "./InputBar";
-export type { InputBarProps } from "./InputBar";
+export { InputBar } from './InputBar'
+export type { InputBarProps } from './InputBar'

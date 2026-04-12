@@ -33,21 +33,16 @@
  *   useFocusTrap — keeping focus trap logic out of this component.
  */
 
-"use client"; // Next.js App Router safety
+'use client' // Next.js App Router safety
 
-import React, {
-  forwardRef,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { forwardRef, useEffect, useRef, useState } from 'react'
 
-import { ChatHeader } from "../ChatHeader";
-import { MessageList } from "../MessageList";
-import { InputBar } from "../InputBar";
-import { cn } from "../../utils/cn";
-import type { Message } from "../../types";
-import styles from "./ChatPanel.module.css";
+import { ChatHeader } from '../ChatHeader'
+import { MessageList } from '../MessageList'
+import { InputBar } from '../InputBar'
+import { cn } from '../../utils/cn'
+import type { Message } from '../../types'
+import styles from './ChatPanel.module.css'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -55,67 +50,67 @@ import styles from "./ChatPanel.module.css";
  * Must match the CSS animation duration in ChatPanel.module.css.
  * Used to delay DOM removal until the close animation finishes.
  */
-const CLOSE_DURATION_MS = 200;
+const CLOSE_DURATION_MS = 200
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 export interface ChatPanelProps {
   /** Controls visibility — drives open/close animation */
-  isOpen: boolean;
+  isOpen: boolean
 
   /** Closes the panel — wired to ChatWidget's close() */
-  onClose: () => void;
+  onClose: () => void
 
   /** Full message history from useChat */
-  messages: Message[];
+  messages: Message[]
 
   /** True while a response is loading or streaming */
-  isLoading: boolean;
+  isLoading: boolean
 
   /** Error string from useChat, or null */
-  error: string | null;
+  error: string | null
 
   /** Send a new message — wired to useChat's sendMessage() */
-  onSend: (text: string) => void;
+  onSend: (text: string) => void
 
   /** Retry the last failed message — wired to useChat's retryLast() */
-  onRetry: () => void;
+  onRetry: () => void
 
   /** Clear all messages — wired to useChat's clearMessages() */
-  onClear: () => void;
+  onClear: () => void
 
   /** Agent display name — forwarded to ChatHeader */
-  agentName?: string;
+  agentName?: string
 
   /** Agent avatar URL or ReactNode — forwarded to ChatHeader */
-  agentAvatar?: string | React.ReactNode;
+  agentAvatar?: string | React.ReactNode
 
   /** Brand logo — forwarded to ChatHeader */
-  logo?: string | React.ReactNode;
+  logo?: string | React.ReactNode
 
   /** InputBar placeholder text */
-  placeholder?: string;
+  placeholder?: string
 
   /**
    * When provided, a ← back button appears in the header.
    * Clicking it navigates back to the home view.
    */
-  onBack?: () => void;
+  onBack?: () => void
 
   /**
    * ID of the dialog element — used by ChatWidget's TriggerButton as
    * aria-controls so the button announces which element it opens.
    */
-  dialogId?: string;
+  dialogId?: string
 
   /**
    * ID applied to the agent name <h2> inside ChatHeader.
    * Referenced by aria-labelledby on the dialog element.
    */
-  dialogLabelId?: string;
+  dialogLabelId?: string
 
   /** Extra class on the root dialog element */
-  className?: string;
+  className?: string
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -131,7 +126,7 @@ export const ChatPanel = forwardRef<HTMLDivElement, ChatPanelProps>(
       onSend,
       onRetry,
       onClear,
-      agentName = "AI Assistant",
+      agentName = 'AI Assistant',
       agentAvatar,
       logo,
       placeholder,
@@ -152,39 +147,39 @@ export const ChatPanel = forwardRef<HTMLDivElement, ChatPanelProps>(
      *                → after CLOSE_DURATION_MS:
      *                  isVisible=false, isClosing=false  (unmounted)
      */
-    const [isVisible, setIsVisible] = useState(isOpen);
-    const [isClosing, setIsClosing] = useState(false);
-    const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [isVisible, setIsVisible] = useState(isOpen)
+    const [isClosing, setIsClosing] = useState(false)
+    const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
       // Clear any in-flight close timer when isOpen changes
       if (closeTimerRef.current) {
-        clearTimeout(closeTimerRef.current);
-        closeTimerRef.current = null;
+        clearTimeout(closeTimerRef.current)
+        closeTimerRef.current = null
       }
 
       if (isOpen) {
         // Opening: mount immediately so the entry animation plays
-        setIsClosing(false);
-        setIsVisible(true);
+        setIsClosing(false)
+        setIsVisible(true)
       } else {
         // Closing: start exit animation, then unmount after it completes
-        setIsClosing(true);
+        setIsClosing(true)
         closeTimerRef.current = setTimeout(() => {
-          setIsVisible(false);
-          setIsClosing(false);
-        }, CLOSE_DURATION_MS);
+          setIsVisible(false)
+          setIsClosing(false)
+        }, CLOSE_DURATION_MS)
       }
 
       return () => {
         if (closeTimerRef.current) {
-          clearTimeout(closeTimerRef.current);
+          clearTimeout(closeTimerRef.current)
         }
-      };
-    }, [isOpen]);
+      }
+    }, [isOpen])
 
     // Don't render anything while fully closed and animation has completed
-    if (!isVisible) return null;
+    if (!isVisible) return null
 
     return (
       <div
@@ -217,10 +212,7 @@ export const ChatPanel = forwardRef<HTMLDivElement, ChatPanelProps>(
         />
 
         {/* ── Message list ── */}
-        <MessageList
-          messages={messages}
-          onRetry={onRetry}
-        />
+        <MessageList messages={messages} onRetry={onRetry} />
 
         {/* ── Input bar ── */}
         <InputBar
@@ -254,8 +246,8 @@ export const ChatPanel = forwardRef<HTMLDivElement, ChatPanelProps>(
           </div>
         )}
       </div>
-    );
+    )
   }
-);
+)
 
-ChatPanel.displayName = "ChatPanel";
+ChatPanel.displayName = 'ChatPanel'

@@ -49,7 +49,9 @@
   background: transparent;
   color: var(--ai-text-muted, #6b7280);
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
   box-sizing: border-box;
 }
 

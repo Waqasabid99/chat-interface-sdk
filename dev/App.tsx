@@ -1,5 +1,5 @@
 import React from 'react'
-import { ChatWidget, Message } from '../src'
+import type { Message } from '../src'
 
 const App: React.FC = () => {
   const handleMessage = async (message: string, history: Message[]) => {
@@ -201,8 +201,8 @@ const App: React.FC = () => {
   return (
     <div className='w-screen h-screen'>
       <h1>Chat Interface SDK Dev</h1>
-      <ChatWidget onMessage={handleMessage} agentName='AA' placeholder='how can we help you' welcomeMessage='Need Support?' welcomeSubMessage='How can we help?' primaryColor='#000'
-        theme='light' helpArticles={helpArticles} showHelpArticles={true} />
+      {/* <ChatWidget onMessage={handleMessage} agentName='AA' placeholder='how can we help you' welcomeMessage='Need Support?' welcomeSubMessage='How can we help?' primaryColor='#000'
+        theme='light' helpArticles={helpArticles} showHelpArticles={true} /> */}
     </div>
   )
 }

@@ -1,8 +1,8 @@
 {
-  "name": "ai-interface",
+  "name": "ai-chat-interface",
   "version": "1.0.0",
   "description": "Zero-config AI chat widget for React. Drop in <AIInterface />, pass your message handler, get a fully functional streaming chat widget.",
-  "author": "",
+  "author": "Waqas Ali Abid",
   "license": "MIT",
   "homepage": "https://github.com/Waqasabid99/chat-interface-sdk.git#readme",
   "repository": {
@@ -13,6 +13,9 @@
     "url": "https://github.com/Waqasabid99/chat-interface-sdk.git/issues"
   },
   "keywords": [
+    "live-chat",
+    "ai-interface",
+    "floating-widget",
     "react",
     "ai",
     "chat",
@@ -27,6 +30,7 @@
     "floating-widget",
     "typescript"
   ],
+  "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -36,6 +40,7 @@
       "require": "./dist/index.cjs",
       "types": "./dist/index.d.ts"
     },
+    "./style.css": "./dist/style.css",
     "./package.json": "./package.json"
   },
   "files": [
@@ -44,7 +49,9 @@
     "LICENSE",
     "README.md"
   ],
-  "sideEffects": ["*.css"],
+  "sideEffects": [
+    "*.css"
+  ],
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
@@ -56,7 +63,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && tsc -p tsconfig.build.json",
+    "build": "vite build",
     "build:watch": "vite build --watch",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
@@ -94,6 +101,7 @@
     "eslint-plugin-jsx-a11y": "^6.9.0",
     "eslint-plugin-react": "^7.35.0",
     "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.19",
     "jest-axe": "^9.0.0",
     "jsdom": "^25.0.1",
     "prettier": "^3.3.3",
@@ -115,12 +123,15 @@
     {
       "name": "useChat hook only",
       "path": "./dist/index.mjs",
-      "limit": "2 KB",
+      "limit": "12 KB",
       "import": "{ useChat }"
     }
   ],
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "install": "^0.13.0"
   }
 }

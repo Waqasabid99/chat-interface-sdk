@@ -21,26 +21,26 @@
  *  - No external dependencies — pure CSS animations for the typing indicator
  */
 
-import React, { memo, useCallback } from "react";
+import React, { memo, useCallback } from 'react'
 
-import { cn } from "../../utils/cn";
-import type { Message } from "../../types";
-import styles from "./MessageBubble.module.css";
-import { TypingIndicator } from "../TypingIndicator";
+import { cn } from '../../utils/cn'
+import type { Message } from '../../types'
+import styles from './MessageBubble.module.css'
+import { TypingIndicator } from '../TypingIndicator'
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 export interface MessageBubbleProps {
-  message: Message;
+  message: Message
 
   /**
    * Called when the user clicks the retry button on an error bubble.
    * Only rendered for assistant messages with status="error".
    */
-  onRetry?: () => void;
+  onRetry?: () => void
 
   /** Extra class applied to the outermost row element. */
-  className?: string;
+  className?: string
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -48,15 +48,15 @@ export interface MessageBubbleProps {
 /** Formats a Date as "h:mm AM/PM" — e.g. "2:34 PM" */
 function formatTime(date: Date): string {
   return date.toLocaleTimeString([], {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+    hour: 'numeric',
+    minute: '2-digit',
+  })
 }
 
 /** Blinking cursor appended to streaming content */
 const StreamCursor: React.FC = () => (
   <span className={styles.streamCursor} aria-hidden="true" />
-);
+)
 
 /** Error icon — inline SVG, no external dep */
 const ErrorIcon: React.FC = () => (
@@ -76,7 +76,7 @@ const ErrorIcon: React.FC = () => (
       clipRule="evenodd"
     />
   </svg>
-);
+)
 
 /** Retry icon */
 const RetryIcon: React.FC = () => (
@@ -95,35 +95,35 @@ const RetryIcon: React.FC = () => (
       clipRule="evenodd"
     />
   </svg>
-);
+)
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const MessageBubble: React.FC<MessageBubbleProps> = memo(
   ({ message, onRetry, className }) => {
-    const { role, content, timestamp, status } = message;
+    const { role, content, timestamp, status } = message
 
-    const isUser      = role === "user";
-    const isLoading   = status === "loading";
-    const isStreaming = status === "streaming";
-    const isError     = status === "error";
-    const isDone      = !status || status === "done";
+    const isUser = role === 'user'
+    const isLoading = status === 'loading'
+    const isStreaming = status === 'streaming'
+    const isError = status === 'error'
+    const isDone = !status || status === 'done'
 
     // ── Retry handler ───────────────────────────────────────────────────────
     const handleRetry = useCallback(
       (e: React.MouseEvent) => {
-        e.stopPropagation();
-        onRetry?.();
+        e.stopPropagation()
+        onRetry?.()
       },
       [onRetry]
-    );
+    )
 
     // ── Bubble content ──────────────────────────────────────────────────────
 
     const renderContent = () => {
       // Loading: show typing dots instead of (empty) content
       if (isLoading) {
-        return <TypingIndicator variant="bubble" />;
+        return <TypingIndicator variant="bubble" />
       }
 
       // Error: error icon + message text + retry button
@@ -132,7 +132,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
           <span className={styles.errorBody}>
             <span className={styles.errorMessage}>
               <ErrorIcon />
-              <span>{content || "Something went wrong."}</span>
+              <span>{content || 'Something went wrong.'}</span>
             </span>
             {onRetry && (
               <button
@@ -146,7 +146,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
               </button>
             )}
           </span>
-        );
+        )
       }
 
       // Streaming: content + blinking cursor
@@ -156,20 +156,20 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
             <span className={styles.text}>{content}</span>
             <StreamCursor />
           </>
-        );
+        )
       }
 
       // Done / welcome message: plain text, preserve newlines
-      return <span className={styles.text}>{content}</span>;
-    };
+      return <span className={styles.text}>{content}</span>
+    }
 
     // ── ARIA role for live updates ──────────────────────────────────────────
     // Assistant messages that arrive during streaming are announced politely.
     // We omit aria-live on user messages (the user typed them).
     const liveProps =
       !isUser && (isLoading || isStreaming)
-        ? { "aria-live": "polite" as const, "aria-atomic": false }
-        : {};
+        ? { 'aria-live': 'polite' as const, 'aria-atomic': false }
+        : {}
 
     return (
       <div
@@ -193,11 +193,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
         <div
           className={cn(
             styles.bubble,
-            isUser      && styles.bubbleUser,
-            isLoading   && styles.bubbleLoading,
-            isStreaming  && styles.bubbleStreaming,
-            isError     && styles.bubbleError,
-            isDone      && !isUser && styles.bubbleDone
+            isUser && styles.bubbleUser,
+            isLoading && styles.bubbleLoading,
+            isStreaming && styles.bubbleStreaming,
+            isError && styles.bubbleError,
+            isDone && !isUser && styles.bubbleDone
           )}
           {...liveProps}
         >
@@ -218,8 +218,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
           </time>
         )}
       </div>
-    );
+    )
   }
-);
+)
 
-MessageBubble.displayName = "MessageBubble";
+MessageBubble.displayName = 'MessageBubble'

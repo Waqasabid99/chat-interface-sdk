@@ -3,9 +3,16 @@
   "compilerOptions": {
     "outDir": "dist",
     "declaration": true,
-    "emitDeclarationOnly": false,
-    "noEmit": false
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "allowImportingTsExtensions": true,
+    "composite": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["src/**/*.test.*", "src/**/*.spec.*"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "src/**/*.test.*",
+    "src/**/*.spec.*"
+  ]
 }

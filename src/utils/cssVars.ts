@@ -6,11 +6,11 @@
  * these variables through the cascade — no prop drilling needed.
  */
 
-type ResolvedTheme = "light" | "dark";
+type ResolvedTheme = 'light' | 'dark'
 
 interface CssVarOptions {
-  primaryColor: string;
-  theme: ResolvedTheme;
+  primaryColor: string
+  theme: ResolvedTheme
 }
 
 /**
@@ -20,13 +20,13 @@ interface CssVarOptions {
 export function buildCssVars({
   primaryColor,
 }: CssVarOptions): Record<string, string> {
-  const fg = getContrastForeground(primaryColor);
+  const fg = getContrastForeground(primaryColor)
 
   return {
-    "--ai-primary": primaryColor,
-    "--ai-primary-fg": fg,
-    "--ai-user-bubble": primaryColor,
-  } as Record<string, string>;
+    '--ai-primary': primaryColor,
+    '--ai-primary-fg': fg,
+    '--ai-user-bubble': primaryColor,
+  } as Record<string, string>
 }
 
 /**
@@ -36,36 +36,36 @@ export function buildCssVars({
  * Formula: relative luminance per WCAG 2.1 §1.4.3
  */
 function getContrastForeground(hex: string): string {
-  const rgb = hexToRgb(hex);
-  if (!rgb) return "#ffffff";
+  const rgb = hexToRgb(hex)
+  if (!rgb) return '#ffffff'
 
   const [r, g, b] = rgb.map((c) => {
-    const s = c / 255;
-    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-  });
+    const s = c / 255
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4)
+  })
 
   // Relative luminance
-  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b
 
   // Contrast ratio against white (1.0) vs near-black (0.05)
-  const contrastWhite = (1.0 + 0.05) / (L + 0.05);
-  const contrastDark  = (L + 0.05) / (0.05 + 0.05);
+  const contrastWhite = (1.0 + 0.05) / (L + 0.05)
+  const contrastDark = (L + 0.05) / (0.05 + 0.05)
 
-  return contrastWhite >= contrastDark ? "#ffffff" : "#111827";
+  return contrastWhite >= contrastDark ? '#ffffff' : '#111827'
 }
 
 function hexToRgb(hex: string): [number, number, number] | null {
-  const clean = hex.replace(/^#/, "");
+  const clean = hex.replace(/^#/, '')
   const full =
     clean.length === 3
       ? clean
-          .split("")
+          .split('')
           .map((c) => c + c)
-          .join("")
-      : clean;
+          .join('')
+      : clean
 
-  if (full.length !== 6) return null;
+  if (full.length !== 6) return null
 
-  const int = parseInt(full, 16);
-  return [(int >> 16) & 255, (int >> 8) & 255, int & 255];
+  const int = parseInt(full, 16)
+  return [(int >> 16) & 255, (int >> 8) & 255, int & 255]
 }

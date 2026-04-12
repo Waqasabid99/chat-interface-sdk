@@ -1,2 +1,2 @@
-export { WidgetHelp } from "./WidgetHelp";
-export type { WidgetHelpProps } from "./WidgetHelp";
+export { WidgetHelp } from './WidgetHelp'
+export type { WidgetHelpProps } from './WidgetHelp'

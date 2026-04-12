@@ -1,1 +1,1 @@
-export * from "./WidgetArticle";
+export * from './WidgetArticle'

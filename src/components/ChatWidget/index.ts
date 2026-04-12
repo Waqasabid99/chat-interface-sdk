@@ -1,2 +1,2 @@
-export { ChatWidget } from "./ChatWidget";
-export type { ChatWidgetProps } from "./ChatWidget";
+export { ChatWidget } from './ChatWidget'
+export type { ChatWidgetProps } from './ChatWidget'

@@ -36,25 +36,21 @@
  * always shows the × icon so the close affordance is always unambiguous.
  */
 
-"use client"; // Next.js App Router safety
+'use client' // Next.js App Router safety
 
-import React, {
-  forwardRef,
-  type ButtonHTMLAttributes,
-} from "react";
+import React, { forwardRef, type ButtonHTMLAttributes } from 'react'
 
-import { cn } from "../../utils/cn";
-import styles from "./TriggerButton.module.css";
+import { cn } from '../../utils/cn'
+import styles from './TriggerButton.module.css'
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
-export interface TriggerButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface TriggerButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Whether the chat panel is currently open */
-  isOpen: boolean;
+  isOpen: boolean
 
   /** Primary accent color — used to derive the button background inline */
-  primaryColor?: string;
+  primaryColor?: string
 
   /**
    * Optional brand logo shown on the button face when the panel is closed.
@@ -62,13 +58,13 @@ export interface TriggerButtonProps
    * ReactNode → rendered directly
    * undefined → default chat bubble SVG
    */
-  logo?: string | React.ReactNode;
+  logo?: string | React.ReactNode
 
   /**
    * Number of messages currently in the conversation.
    * When > 0 and the panel is closed, an unread indicator dot is shown.
    */
-  messageCount?: number;
+  messageCount?: number
 }
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -90,7 +86,7 @@ const ChatIcon: React.FC = () => (
       clipRule="evenodd"
     />
   </svg>
-);
+)
 
 /** Close / X icon — shown when the panel is open */
 const CloseIcon: React.FC = () => (
@@ -109,27 +105,22 @@ const CloseIcon: React.FC = () => (
       clipRule="evenodd"
     />
   </svg>
-);
+)
 
 // ─── Logo renderer (mirrors ChatHeader's Logo sub-component) ──────────────────
 
 interface LogoMarkProps {
-  logo: string | React.ReactNode;
+  logo: string | React.ReactNode
 }
 
 const LogoMark: React.FC<LogoMarkProps> = ({ logo }) => {
-  if (typeof logo === "string") {
+  if (typeof logo === 'string') {
     return (
-      <img
-        src={logo}
-        alt=""
-        className={styles.logoImg}
-        draggable={false}
-      />
-    );
+      <img src={logo} alt="" className={styles.logoImg} draggable={false} />
+    )
   }
-  return <span className={styles.logoNode}>{logo}</span>;
-};
+  return <span className={styles.logoNode}>{logo}</span>
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -145,17 +136,13 @@ export const TriggerButton = forwardRef<HTMLButtonElement, TriggerButtonProps>(
     },
     ref
   ) => {
-    const hasUnread = !isOpen && messageCount > 0;
-
+    const hasUnread = !isOpen && messageCount > 0
+    console.log(primaryColor)
     return (
       <button
         ref={ref}
         type="button"
-        className={cn(
-          styles.button,
-          isOpen && styles.buttonOpen,
-          className
-        )}
+        className={cn(styles.button, isOpen && styles.buttonOpen, className)}
         {...rest}
       >
         {/* ── Icon layer — chat/logo OR close, with crossfade ── */}
@@ -186,20 +173,13 @@ export const TriggerButton = forwardRef<HTMLButtonElement, TriggerButtonProps>(
         </span>
 
         {/* ── Unread indicator dot ── */}
-        {hasUnread && (
-          <span
-            className={styles.unreadDot}
-            aria-hidden="true"
-          />
-        )}
+        {hasUnread && <span className={styles.unreadDot} aria-hidden="true" />}
 
         {/* ── Ripple ring — plays on open ── */}
-        {isOpen && (
-          <span className={styles.ripple} aria-hidden="true" />
-        )}
+        {isOpen && <span className={styles.ripple} aria-hidden="true" />}
       </button>
-    );
+    )
   }
-);
+)
 
-TriggerButton.displayName = "TriggerButton";
+TriggerButton.displayName = 'TriggerButton'

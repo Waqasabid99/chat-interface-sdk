@@ -24,47 +24,48 @@
 /* ── Light mode defaults ──────────────────────────────────────────────────── */
 .root {
   /* Typography */
-  --ai-font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui,
-    -apple-system, sans-serif;
-  --ai-font-size-base: 0.9375rem;   /* 15 px */
-  --ai-font-size-sm:   0.8125rem;   /* 13 px */
-  --ai-line-height:    1.55;
+  --ai-font-sans:
+    'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system,
+    sans-serif;
+  --ai-font-size-base: 0.9375rem; /* 15 px */
+  --ai-font-size-sm: 0.8125rem; /* 13 px */
+  --ai-line-height: 1.55;
 
   /* Radii */
-  --ai-radius:    0.5rem;    /* 8 px  — bubbles, inputs  */
-  --ai-radius-lg: 1rem;      /* 16 px — panel corners    */
-  --ai-radius-xl: 1.25rem;   /* 20 px — trigger button   */
+  --ai-radius: 0.5rem; /* 8 px  — bubbles, inputs  */
+  --ai-radius-lg: 1rem; /* 16 px — panel corners    */
+  --ai-radius-xl: 1.25rem; /* 20 px — trigger button   */
 
   /* Spacing */
-  --ai-panel-width:   380px;
-  --ai-panel-height:  580px;
-  --ai-gap:           0.75rem;  /* 12 px */
+  --ai-panel-width: 380px;
+  --ai-panel-height: 580px;
+  --ai-gap: 0.75rem; /* 12 px */
 
   /* Shadows */
   --ai-shadow-trigger: 0 4px 14px rgba(0, 0, 0, 0.18);
-  --ai-shadow-panel:   0 20px 60px rgba(0, 0, 0, 0.12),
-                       0 4px 16px rgba(0, 0, 0, 0.06);
+  --ai-shadow-panel:
+    0 20px 60px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.06);
 
   /* Light theme tokens — overridden by [data-theme="dark"] below */
-  --ai-bg:               #ffffff;
-  --ai-surface:          #f9fafb;
-  --ai-surface-hover:    #f3f4f6;
-  --ai-border:           #e5e7eb;
-  --ai-text:             #111827;
-  --ai-text-muted:       #6b7280;
+  --ai-bg: #ffffff;
+  --ai-surface: #f9fafb;
+  --ai-surface-hover: #f3f4f6;
+  --ai-border: #e5e7eb;
+  --ai-text: #111827;
+  --ai-text-muted: #6b7280;
   --ai-assistant-bubble: #f3f4f6;
-  --ai-error-bg:         #fef2f2;
-  --ai-error-text:       #dc2626;
-  --ai-error-border:     #fecaca;
+  --ai-error-bg: #fef2f2;
+  --ai-error-text: #dc2626;
+  --ai-error-border: #fecaca;
 
   /* Primary + foreground are injected by cssVars.ts at runtime */
-  --ai-primary:    #2563eb;
+  --ai-primary: #2563eb;
   --ai-primary-fg: #ffffff;
   --ai-user-bubble: var(--ai-primary);
 
   /* Z-index stack */
-  --ai-z-widget:  9999;
-  --ai-z-panel:   10000;
+  --ai-z-widget: 9999;
+  --ai-z-panel: 10000;
 
   /* ── Layout ── */
   position: fixed;
@@ -84,44 +85,44 @@
 }
 
 /* ── Dark mode tokens ─────────────────────────────────────────────────────── */
-.root[data-theme="dark"] {
-  --ai-bg:               #1a1a2e;
-  --ai-surface:          #16213e;
-  --ai-surface-hover:    #0f3460;
-  --ai-border:           #2d2d4e;
-  --ai-text:             #f1f5f9;
-  --ai-text-muted:       #94a3b8;
+.root[data-theme='dark'] {
+  --ai-bg: #1a1a2e;
+  --ai-surface: #16213e;
+  --ai-surface-hover: #0f3460;
+  --ai-border: #2d2d4e;
+  --ai-text: #f1f5f9;
+  --ai-text-muted: #94a3b8;
   --ai-assistant-bubble: #1e2a45;
-  --ai-shadow-panel:     0 20px 60px rgba(0, 0, 0, 0.5),
-                         0 4px 16px rgba(0, 0, 0, 0.3);
-  --ai-error-bg:         #2d1b1b;
-  --ai-error-text:       #f87171;
-  --ai-error-border:     #7f1d1d;
+  --ai-shadow-panel:
+    0 20px 60px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3);
+  --ai-error-bg: #2d1b1b;
+  --ai-error-text: #f87171;
+  --ai-error-border: #7f1d1d;
 }
 
 /* ── Positioning variants ─────────────────────────────────────────────────── */
 .bottom-right {
   bottom: 1.5rem;
-  right:  1.5rem;
+  right: 1.5rem;
   align-items: flex-end;
 }
 
 .bottom-left {
   bottom: 1.5rem;
-  left:   1.5rem;
+  left: 1.5rem;
   align-items: flex-start;
 }
 
 /* ── Panel Area constraints for Home and Help views ───────────────────────── */
 .panelArea {
-  width:      var(--ai-panel-width,  380px);
-  height:     var(--ai-panel-height, 580px);
-  max-width:  100vw;
+  width: var(--ai-panel-width, 380px);
+  height: var(--ai-panel-height, 580px);
+  max-width: 100vw;
   max-height: 100dvh;
   border-radius: var(--ai-radius-lg);
-  border:        1px solid var(--ai-border);
-  box-shadow:    var(--ai-shadow-panel);
-  z-index:       var(--ai-z-panel, 10000);
+  border: 1px solid var(--ai-border);
+  box-shadow: var(--ai-shadow-panel);
+  z-index: var(--ai-z-panel, 10000);
   background-color: var(--ai-bg);
   transform-origin: bottom right;
 }
@@ -133,19 +134,19 @@
 /* ── Responsive — shrink panel on small screens ───────────────────────────── */
 @media (max-width: 480px) {
   .root {
-    --ai-panel-width:  100vw;
+    --ai-panel-width: 100vw;
     --ai-panel-height: 100dvh; /* dynamic viewport height — avoids iOS toolbar overlap */
-    --ai-radius-lg:    0;
+    --ai-radius-lg: 0;
   }
 
   .bottom-right,
   .bottom-left {
     bottom: 0;
-    right:  0;
-    left:   0;
+    right: 0;
+    left: 0;
     align-items: stretch;
   }
-  
+
   .panelArea {
     width: 100%;
     height: 100%;
@@ -160,12 +161,12 @@
 @media (min-width: 481px) and (max-width: 768px) {
   .bottom-right {
     bottom: 1rem;
-    right:  1rem;
+    right: 1rem;
   }
 
   .bottom-left {
     bottom: 1rem;
-    left:   1rem;
+    left: 1rem;
   }
 
   .panelArea {
@@ -176,8 +177,8 @@
 /* ── Reduced motion — disable animations globally for the widget ─────────── */
 @media (prefers-reduced-motion: reduce) {
   .root * {
-    animation-duration:   0.01ms !important;
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration:  0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

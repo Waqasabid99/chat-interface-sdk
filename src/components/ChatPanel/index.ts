@@ -1,2 +1,2 @@
-export { ChatPanel } from "./ChatPanel";
-export type { ChatPanelProps } from "./ChatPanel";
+export { ChatPanel } from './ChatPanel'
+export type { ChatPanelProps } from './ChatPanel'
