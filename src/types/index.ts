@@ -1,10 +1,17 @@
 export type Role = 'user' | 'assistant'
+
 export type Status = 'loading' | 'streaming' | 'done' | 'error'
+
+export type Block = 'ParagraphBlock' | 'ImageBlock' | 'TextBlock' | 'CodeBlock' | 'TableBlock' | 'ListBlock' | 'QuoteBlock' | 'LinkBlock' | 'VideoBlock' | 'AudioBlock' | 'FileBlock' | 'UnknownBlock'
 
 export interface ChatConfig {
   theme: 'light' | 'dark' | 'auto'
   apiEndpoint: string
   maxMessages?: number
+}
+
+export interface Formatter {
+  parse(content: string): Block[]
 }
 
 export interface Message {
@@ -24,6 +31,8 @@ export interface UseChatOptions {
   onMessage: OnMessageHandler
   /** Optional welcome message shown as the first assistant message */
   welcomeMessage?: string
+  /** Initial messages to populate the chat history */
+  initialMessages?: Message[]
 }
 
 export interface UseChatReturn {

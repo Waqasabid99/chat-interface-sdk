@@ -76,6 +76,12 @@ export interface ChatHeaderProps {
 
   /** Extra class on the root <header> element */
   className?: string
+
+  /** Whether the chat is currently maximized to full screen */
+  isMaximized?: boolean
+
+  /** Toggles the maximized state */
+  onMaximizeToggle?: () => void
 }
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -114,6 +120,36 @@ const CloseIcon: React.FC = () => (
   </svg>
 )
 
+/** Maximize icon */
+const MaximizeIcon: React.FC = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 20 20"
+    fill="currentColor"
+    width="16"
+    height="16"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path d="M3.25 3.5a.75.75 0 0 0 0 1.5h4.69l-5.22 5.22a.75.75 0 1 0 1.06 1.06l5.22-5.22v4.69a.75.75 0 0 0 1.5 0v-6.5a.75.75 0 0 0-.75-.75h-6.5ZM16.75 16.5a.75.75 0 0 0 0-1.5h-4.69l5.22-5.22a.75.75 0 0 0-1.06-1.06l-5.22 5.22v-4.69a.75.75 0 0 0-1.5 0v6.5a.75.75 0 0 0 .75.75h6.5Z" />
+  </svg>
+)
+
+/** Restore / Minimize icon */
+const RestoreIcon: React.FC = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 20 20"
+    fill="currentColor"
+    width="16"
+    height="16"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path d="M7.75 2.75a.75.75 0 0 0-1.5 0v4.69l-5.22-5.22a.75.75 0 0 0-1.06 1.06l5.22 5.22H.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 .75-.75v-6.5ZM19.5 12.25a.75.75 0 0 0 0 1.5h-4.69l5.22 5.22a.75.75 0 1 1-1.06 1.06l-5.22-5.22v4.69a.75.75 0 0 1-1.5 0v-6.5a.75.75 0 0 1 .75-.75h6.5Z" />
+  </svg>
+)
+
 /** Trash / clear conversation icon */
 const ClearIcon: React.FC = () => (
   <svg
@@ -146,7 +182,7 @@ interface AvatarProps {
  *  2. string     → treated as an image URL, rendered as <img>
  *  3. undefined  → initials derived from agentName (up to 2 chars)
  */
-const Avatar: React.FC<AvatarProps> = ({ agentAvatar, agentName }) => {
+export const Avatar: React.FC<AvatarProps> = ({ agentAvatar, agentName }) => {
   const initials = useMemo(() => {
     const words = agentName.trim().split(/\s+/)
     if (words.length === 1) return words[0].slice(0, 2).toUpperCase()
@@ -180,7 +216,7 @@ interface LogoProps {
   logo: string | React.ReactNode
 }
 
-const Logo: React.FC<LogoProps> = ({ logo }) => {
+export const Logo: React.FC<LogoProps> = ({ logo }) => {
   if (typeof logo === 'string') {
     return (
       <span className={styles.logo} aria-hidden="true">
@@ -208,9 +244,11 @@ export const ChatHeader: React.FC<ChatHeaderProps> = memo(
     onClear,
     dialogLabelId,
     className,
+    isMaximized,
+    onMaximizeToggle,
   }) => {
     return (
-      <header className={cn(styles.root, className)}>
+      <header className={cn(styles.root, isMaximized && styles.isMaximized, className)}>
         {/* ── Back button (optional) ── */}
         {onBack && (
           <button
@@ -269,6 +307,19 @@ export const ChatHeader: React.FC<ChatHeaderProps> = memo(
               title="Clear conversation"
             >
               <ClearIcon />
+            </button>
+          )}
+
+          {/* Maximize/Restore button — hidden on small screens via CSS */}
+          {onMaximizeToggle && (
+            <button
+              type="button"
+              className={cn(styles.iconButton, styles.maximizeButton)}
+              onClick={onMaximizeToggle}
+              aria-label={isMaximized ? 'Restore window size' : 'Maximize window'}
+              title={isMaximized ? 'Restore' : 'Maximize'}
+            >
+              {isMaximized ? <RestoreIcon /> : <MaximizeIcon />}
             </button>
           )}
 

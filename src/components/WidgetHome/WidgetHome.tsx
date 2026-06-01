@@ -395,7 +395,7 @@ export const WidgetHome: React.FC<WidgetHomeProps> = memo(
                   onClick={onStartChat}
                   aria-label="View recent conversation"
                 >
-                  <p className={styles.cardLabel}>Recent message</p>
+                  <p className={styles.cardLabel}>Chat history</p>
                   <div className={styles.recentRow}>
                     <Avatar
                       agentAvatar={agentAvatar}

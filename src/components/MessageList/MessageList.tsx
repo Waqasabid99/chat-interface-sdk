@@ -49,6 +49,12 @@ export interface MessageListProps {
    */
   onRetry?: () => void
 
+  /** URL string or React element used as the agent's avatar */
+  agentAvatar?: string | React.ReactNode
+
+  /** Name shown in the widget header. Default: "AI Assistant" */
+  agentName?: string
+
   /** Extra class applied to the scrollable root element. */
   className?: string
 }
@@ -102,7 +108,7 @@ const EmptyState: React.FC = () => (
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const MessageList: React.FC<MessageListProps> = memo(
-  ({ messages, onRetry, className }) => {
+  ({ messages, onRetry, className, agentAvatar, agentName }) => {
     const scrollRootRef = useRef<HTMLDivElement>(null)
     const sentinelRef = useRef<HTMLDivElement>(null)
 
@@ -218,6 +224,8 @@ export const MessageList: React.FC<MessageListProps> = memo(
                 <li key={message.id} className={styles.listItem}>
                   <MessageBubble
                     message={message}
+                    agentAvatar={agentAvatar}
+                    agentName={agentName}
                     onRetry={
                       message.role === 'assistant' && message.status === 'error'
                         ? onRetry

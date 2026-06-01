@@ -125,7 +125,7 @@
     {
       "name": "useChat hook only",
       "path": "./dist/index.mjs",
-      "limit": "12 KB",
+      "limit": "20 KB",
       "import": "{ useChat }"
     }
   ],
@@ -134,6 +134,8 @@
     "npm": ">=9.0.0"
   },
   "dependencies": {
-    "install": "^0.13.0"
+    "install": "^0.13.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   }
 }

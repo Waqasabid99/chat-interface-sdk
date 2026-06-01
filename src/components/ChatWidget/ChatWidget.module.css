@@ -27,19 +27,25 @@
   --ai-font-sans:
     'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system,
     sans-serif;
-  --ai-font-size-base: 0.9375rem; /* 15 px */
-  --ai-font-size-sm: 0.8125rem; /* 13 px */
+  --ai-font-size-base: 0.9375rem;
+  /* 15 px */
+  --ai-font-size-sm: 0.8125rem;
+  /* 13 px */
   --ai-line-height: 1.55;
 
   /* Radii */
-  --ai-radius: 0.5rem; /* 8 px  — bubbles, inputs  */
-  --ai-radius-lg: 1rem; /* 16 px — panel corners    */
-  --ai-radius-xl: 1.25rem; /* 20 px — trigger button   */
+  --ai-radius: 0.5rem;
+  /* 8 px  — bubbles, inputs  */
+  --ai-radius-lg: 1rem;
+  /* 16 px — panel corners    */
+  --ai-radius-xl: 1.25rem;
+  /* 20 px — trigger button   */
 
   /* Spacing */
   --ai-panel-width: 380px;
   --ai-panel-height: 580px;
-  --ai-gap: 0.75rem; /* 12 px */
+  --ai-gap: 0.75rem;
+  /* 12 px */
 
   /* Shadows */
   --ai-shadow-trigger: 0 4px 14px rgba(0, 0, 0, 0.18);
@@ -131,19 +137,48 @@
   transform-origin: bottom left;
 }
 
+/* ── Maximized state — full screen ── */
+.root.isMaximized {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+}
+
+.root.isMaximized .panelArea {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
 /* ── Responsive — shrink panel on small screens ───────────────────────────── */
 @media (max-width: 480px) {
   .root {
     --ai-panel-width: 100vw;
-    --ai-panel-height: 100dvh; /* dynamic viewport height — avoids iOS toolbar overlap */
+    --ai-panel-height: 100dvh;
     --ai-radius-lg: 0;
+  }
+
+  .root.isOpen {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100dvh;
   }
 
   .bottom-right,
   .bottom-left {
-    bottom: 0;
+    bottom: 1rem;
     right: 0;
-    left: 0;
+    left: 80%;
     align-items: stretch;
   }
 
@@ -154,6 +189,10 @@
     border: none;
     box-shadow: none;
     transform-origin: bottom center;
+  }
+
+  .root.isOpen .trigger {
+    display: none;
   }
 }
 

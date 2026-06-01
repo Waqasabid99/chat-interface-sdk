@@ -12,6 +12,8 @@ export declare const AIInterfaceProvider: default_2.FC<{
     children: default_2.ReactNode;
 }>;
 
+export declare type Block = 'ParagraphBlock' | 'ImageBlock' | 'TextBlock' | 'CodeBlock' | 'TableBlock' | 'ListBlock' | 'QuoteBlock' | 'LinkBlock' | 'VideoBlock' | 'AudioBlock' | 'FileBlock' | 'UnknownBlock';
+
 export declare interface ChatConfig {
     theme: 'light' | 'dark' | 'auto';
     apiEndpoint: string;
@@ -155,6 +157,10 @@ declare interface ChatWidgetProps {
     className?: string;
     /** Inline style override for the root container */
     style?: default_2.CSSProperties;
+}
+
+export declare interface Formatter {
+    parse(content: string): Block[];
 }
 
 declare interface HelpArticle {

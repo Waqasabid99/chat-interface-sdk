@@ -111,6 +111,12 @@ export interface ChatPanelProps {
 
   /** Extra class on the root dialog element */
   className?: string
+
+  /** Whether the chat is currently maximized to full screen */
+  isMaximized?: boolean
+
+  /** Toggles the maximized state */
+  onMaximizeToggle?: () => void
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -134,6 +140,8 @@ export const ChatPanel = forwardRef<HTMLDivElement, ChatPanelProps>(
       dialogId,
       dialogLabelId,
       className,
+      isMaximized,
+      onMaximizeToggle,
     },
     ref
   ) => {
@@ -188,6 +196,7 @@ export const ChatPanel = forwardRef<HTMLDivElement, ChatPanelProps>(
         className={cn(
           styles.panel,
           isClosing ? styles.closing : styles.opening,
+          isMaximized && styles.isMaximized,
           className
         )}
         // ARIA dialog semantics
@@ -209,10 +218,12 @@ export const ChatPanel = forwardRef<HTMLDivElement, ChatPanelProps>(
           onBack={onBack}
           onClear={messages.length > 0 ? onClear : undefined}
           dialogLabelId={dialogLabelId}
+          isMaximized={isMaximized}
+          onMaximizeToggle={onMaximizeToggle}
         />
 
         {/* ── Message list ── */}
-        <MessageList messages={messages} onRetry={onRetry} />
+        <MessageList messages={messages} onRetry={onRetry} agentAvatar={agentAvatar} agentName={agentName} />
 
         {/* ── Input bar ── */}
         <InputBar

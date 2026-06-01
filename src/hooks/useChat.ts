@@ -7,8 +7,12 @@ import { generateId, isReadableStream } from '../utils/generateId'
 export function useChat({
   onMessage,
   welcomeMessage,
+  initialMessages,
 }: UseChatOptions): UseChatReturn {
   const buildInitialMessages = (): Message[] => {
+    if (initialMessages && initialMessages.length > 0) {
+      return initialMessages
+    }
     if (!welcomeMessage) return []
     return [
       {

@@ -26,9 +26,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.75rem 1rem; /* 12px 16px */
-  flex-shrink: 0; /* never crushed by MessageList */
-  position: relative; /* stacking context for .divider */
+  padding: 0.75rem 1rem;
+  /* 12px 16px */
+  flex-shrink: 0;
+  /* never crushed by MessageList */
+  position: relative;
+  /* stacking context for .divider */
 
   /* Surface */
   background-color: var(--ai-surface);
@@ -44,6 +47,10 @@
 
   /* Smooth background transition when theme switches */
   transition: background-color 200ms ease;
+}
+
+.isMaximized {
+  border-radius: 0 !important;
 }
 
 /* ── Bottom divider ───────────────────────────────────────────────────────── */
@@ -63,8 +70,10 @@
 .identity {
   display: flex;
   align-items: center;
-  gap: 0.625rem; /* 10px */
-  min-width: 0; /* allow text truncation */
+  gap: 0.625rem;
+  /* 10px */
+  min-width: 0;
+  /* allow text truncation */
   flex: 1 1 0;
 }
 
@@ -140,7 +149,8 @@
   background-color: var(--ai-primary);
   color: var(--ai-primary-fg);
 
-  font-size: 0.8125rem; /* 13px */
+  font-size: 0.8125rem;
+  /* 13px */
   font-weight: 600;
   letter-spacing: 0.02em;
   line-height: 1;
@@ -156,7 +166,8 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: #22c55e; /* green-500 — intentionally not a token; semantic */
+  background-color: #22c55e;
+  /* green-500 — intentionally not a token; semantic */
   border: 2px solid var(--ai-surface);
 
   /* Subtle pulse — signals the agent is live */
@@ -164,10 +175,12 @@
 }
 
 @keyframes onlinePulse {
+
   0%,
   100% {
     box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
   }
+
   50% {
     box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
   }
@@ -179,7 +192,8 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  min-width: 0; /* allow truncation */
+  min-width: 0;
+  /* allow truncation */
 }
 
 /* ── Agent name <h2> ──────────────────────────────────────────────────────── */
@@ -191,7 +205,8 @@
   box-sizing: border-box;
 
   font-family: var(--ai-font-sans);
-  font-size: 0.9375rem; /* 15px — matches --ai-font-size-base */
+  font-size: 0.9375rem;
+  /* 15px — matches --ai-font-size-base */
   font-weight: 600;
   line-height: 1.2;
   color: var(--ai-text);
@@ -208,7 +223,8 @@
 .statusLine {
   display: flex;
   align-items: center;
-  height: 16px; /* fixed height prevents layout shift on status swap */
+  height: 16px;
+  /* fixed height prevents layout shift on status swap */
 }
 
 /* "Online" badge */
@@ -216,7 +232,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.6875rem; /* 11px */
+  font-size: 0.6875rem;
+  /* 11px */
   color: var(--ai-text-muted);
   line-height: 1;
 }
@@ -257,20 +274,24 @@
 .typingDot:nth-child(1) {
   animation-delay: 0ms;
 }
+
 .typingDot:nth-child(2) {
   animation-delay: 140ms;
 }
+
 .typingDot:nth-child(3) {
   animation-delay: 280ms;
 }
 
 @keyframes headerDotBounce {
+
   0%,
   80%,
   100% {
     transform: translateY(0);
     opacity: 0.4;
   }
+
   40% {
     transform: translateY(-4px);
     opacity: 1;
@@ -282,7 +303,8 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: 0.25rem; /* 4px — buttons sit close together */
+  gap: 0.25rem;
+  /* 4px — buttons sit close together */
   flex-shrink: 0;
 }
 
@@ -330,7 +352,8 @@
 /* ── Back button — navigates to home view ────────────────────────────────── */
 
 .backButton {
-  margin-right: 0.125rem; /* small gap before identity group */
+  margin-right: 0.125rem;
+  /* small gap before identity group */
   flex-shrink: 0;
 }
 
@@ -353,6 +376,12 @@
   color: var(--ai-text);
 }
 
+/* ── Maximize — hidden on mobile via media query ── */
+
+.maximizeButton {
+  display: inline-flex;
+}
+
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
@@ -364,6 +393,10 @@
 
   .agentName {
     max-width: 130px;
+  }
+
+  .maximizeButton {
+    display: none;
   }
 }
 

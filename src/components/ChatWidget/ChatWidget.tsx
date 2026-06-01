@@ -18,7 +18,7 @@ import { useTheme } from '../../hooks/useTheme'
 import { cn } from '../../utils/cn'
 import { buildCssVars } from '../../utils/cssVars'
 
-import type { OnMessageHandler } from '../../types'
+import type { OnMessageHandler, Message } from '../../types'
 import type { HelpArticle } from '../WidgetHome'
 
 import styles from './ChatWidget.module.css'
@@ -112,6 +112,12 @@ export interface ChatWidgetProps {
 
   /** Inline style override for the root container */
   style?: React.CSSProperties
+
+  /** Initial messages to populate the chat history */
+  initialMessages?: Message[]
+
+  /** Whether to show the chat history section on the home screen. Default: false */
+  showHistory?: boolean
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -138,6 +144,8 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   position = 'bottom-right',
   className,
   style,
+  initialMessages,
+  showHistory = false,
 }) => {
   // ── SSR guard ─────────────────────────────────────────────────────────────
   const [mounted, setMounted] = useState(false)
@@ -166,6 +174,10 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   const [chatPanelOpen, setChatPanelOpen] = useState(defaultView === 'chat')
   const [activeArticle, setActiveArticle] = useState<HelpArticle | null>(null)
   const viewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // ── Maximize logic ───────────────────────────────────────────────────────
+  const [isMaximized, setIsMaximized] = useState(false)
+  const toggleMaximize = useCallback(() => setIsMaximized((prev) => !prev), [])
 
   /** Navigate to the chat view immediately (no delay needed for opening). */
   const goToChat = useCallback(() => {
@@ -229,6 +241,8 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
     if (!isOpen) {
       if (viewTimerRef.current) clearTimeout(viewTimerRef.current)
       setChatPanelOpen(false)
+      // Close maximization if the widget is closed
+      setIsMaximized(false)
     } else if (activeView === 'chat') {
       setChatPanelOpen(true)
     }
@@ -257,7 +271,26 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
 
   // ── Chat state ────────────────────────────────────────────────────────────
   const { messages, sendMessage, isLoading, error, clearMessages, retryLast } =
-    useChat({ onMessage, welcomeMessage })
+    useChat({ onMessage, welcomeMessage, initialMessages })
+
+  // ── Derived recent message for home screen ──────────────────────────────
+  // If showHistory is enabled and we have messages, show the last one.
+  // Otherwise, fallback to the legacy recentMessage prop.
+  const canShowHistory = showHistory && messages.length > 0
+  const sessionLastMessage = messages[messages.length - 1]
+  const displayRecentMessage = canShowHistory
+    ? sessionLastMessage?.content
+    : recentMessage
+
+  const displayRecentTime = canShowHistory
+    ? sessionLastMessage
+      ? new Intl.DateTimeFormat('en-US', {
+          hour: 'numeric',
+          minute: 'numeric',
+          hour12: true,
+        }).format(sessionLastMessage.timestamp)
+      : undefined
+    : recentMessageTime
 
   // ── Focus management ──────────────────────────────────────────────────────
   const panelRef = useRef<HTMLDivElement>(null)
@@ -290,7 +323,13 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
 
   return (
     <div
-      className={cn(styles.root, styles[position], className)}
+      className={cn(
+        styles.root,
+        styles[position],
+        isOpen && styles.isOpen,
+        isMaximized && styles.isMaximized,
+        className
+      )}
       style={{ ...cssVars, ...style }}
       data-theme={resolvedTheme}
     >
@@ -303,8 +342,8 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
           agentName={agentName}
           agentAvatar={agentAvatar}
           logo={logo}
-          recentMessage={recentMessage}
-          recentMessageTime={recentMessageTime}
+          recentMessage={displayRecentMessage}
+          recentMessageTime={displayRecentTime}
           statusText={statusText}
           statusUpdated={statusUpdated}
           helpArticles={helpArticles}
@@ -356,19 +395,24 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
         placeholder={placeholder}
         dialogId={dialogId}
         dialogLabelId={dialogLabelId}
+        isMaximized={isMaximized}
+        onMaximizeToggle={toggleMaximize}
       />
 
       {/* ── Trigger Button ── */}
-      <TriggerButton
-        ref={triggerRef}
-        isOpen={isOpen}
-        onClick={toggle}
-        primaryColor={primaryColor}
-        logo={logo}
-        aria-expanded={isOpen}
-        aria-controls={dialogId}
-        aria-label={isOpen ? 'Close chat' : 'Open chat'}
-      />
+      {!isMaximized && (
+        <TriggerButton
+          ref={triggerRef}
+          className={styles.trigger}
+          isOpen={isOpen}
+          onClick={toggle}
+          primaryColor={primaryColor}
+          logo={logo}
+          aria-expanded={isOpen}
+          aria-controls={dialogId}
+          aria-label={isOpen ? 'Close chat' : 'Open chat'}
+        />
+      )}
     </div>
   )
 }

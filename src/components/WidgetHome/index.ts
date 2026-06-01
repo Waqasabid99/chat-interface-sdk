@@ -1,2 +1,2 @@
-export { WidgetHome } from './WdigetHome'
-export type { WidgetHomeProps, HelpArticle } from './WdigetHome'
+export { WidgetHome } from './WidgetHome'
+export type { WidgetHomeProps, HelpArticle } from './WidgetHome'

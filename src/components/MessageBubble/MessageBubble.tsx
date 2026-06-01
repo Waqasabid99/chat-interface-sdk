@@ -21,12 +21,14 @@
  *  - No external dependencies — pure CSS animations for the typing indicator
  */
 
-import React, { memo, useCallback } from 'react'
+import React, { memo, useCallback, useMemo } from 'react'
 
 import { cn } from '../../utils/cn'
 import type { Message } from '../../types'
 import styles from './MessageBubble.module.css'
+import stylesHeader from '../ChatHeader/ChatHeader.module.css'
 import { TypingIndicator } from '../TypingIndicator'
+import { MarkdownRenderer } from '../MarkdownRenderer/MarkdownRenderer'
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -39,8 +41,15 @@ export interface MessageBubbleProps {
    */
   onRetry?: () => void
 
+  /** URL string or React element used as the agent's avatar */
+  agentAvatar?: string | React.ReactNode
+
+  /** Name shown in the widget header. Default: "AI Assistant" */
+  agentName?: string
+
   /** Extra class applied to the outermost row element. */
   className?: string
+
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -53,10 +62,6 @@ function formatTime(date: Date): string {
   })
 }
 
-/** Blinking cursor appended to streaming content */
-const StreamCursor: React.FC = () => (
-  <span className={styles.streamCursor} aria-hidden="true" />
-)
 
 /** Error icon — inline SVG, no external dep */
 const ErrorIcon: React.FC = () => (
@@ -100,7 +105,7 @@ const RetryIcon: React.FC = () => (
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const MessageBubble: React.FC<MessageBubbleProps> = memo(
-  ({ message, onRetry, className }) => {
+  ({ message, onRetry, className, agentAvatar, agentName }) => {
     const { role, content, timestamp, status } = message
 
     const isUser = role === 'user'
@@ -117,6 +122,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
       },
       [onRetry]
     )
+
+
+    const initials = useMemo(() => {
+      const words = agentName?.trim().split(/\s+/) || []
+      if (words.length === 1) return words[0].slice(0, 2).toUpperCase()
+      return (words[0][0] + words[1][0]).toUpperCase()
+    }, [agentName])
 
     // ── Bubble content ──────────────────────────────────────────────────────
 
@@ -151,16 +163,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
 
       // Streaming: content + blinking cursor
       if (isStreaming) {
-        return (
-          <>
-            <span className={styles.text}>{content}</span>
-            <StreamCursor />
-          </>
-        )
+        return <MarkdownRenderer content={content} isStreaming={true} />
       }
 
-      // Done / welcome message: plain text, preserve newlines
-      return <span className={styles.text}>{content}</span>
+      // Done / welcome message: formatted markdown
+      return <MarkdownRenderer content={content} />
     }
 
     // ── ARIA role for live updates ──────────────────────────────────────────
@@ -182,11 +189,24 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
         role="listitem"
       >
         {/* ── Assistant avatar dot ── */}
-        {!isUser && (
+        {!isUser && (agentName || agentAvatar) && (
           <span
-            className={cn(styles.avatar, isLoading && styles.avatarPulse)}
-            aria-hidden="true"
-          />
+            className={cn(styles.avatar)}
+            aria-hidden="false"
+          >
+            {
+              agentAvatar ? (
+                <img
+                  src={agentAvatar as string}
+                  alt={""}
+                  className={stylesHeader.avatarImg}
+
+                />
+              ) : (
+                <div className={stylesHeader.avatarInitials}>{initials}</div>
+              )
+            }
+          </span>
         )}
 
         {/* ── Bubble ── */}
@@ -211,7 +231,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
               styles.timestamp,
               isUser ? styles.timestampUser : styles.timestampAssistant
             )}
-            dateTime={timestamp.toISOString()}
+            dateTime={timestamp?.toISOString()}
             aria-hidden="true"
           >
             {formatTime(timestamp)}

@@ -1,8 +1,12 @@
-import React from 'react'
-import type { Message } from '../src'
+import React, { useEffect, useState } from 'react'
+import { ChatWidget, type Message } from '../src'
 
 const App: React.FC = () => {
+  const [messages, setMessages] = useState<Message[]>([]);
+
   const handleMessage = async (message: string, history: Message[]) => {
+    localStorage.setItem("messages", JSON.stringify(history));
+
     const body = {
       model: "qwen3.5:0.8b",
       messages: [
@@ -14,7 +18,7 @@ const App: React.FC = () => {
       think: false,
       stream: true
     }
-    console.log(body)
+
     const response = await fetch(`http://localhost:11434/api/chat`, {
       method: 'POST',
       headers: {
@@ -31,9 +35,16 @@ const App: React.FC = () => {
     if (!response.body) {
       throw new Error('Streaming response body is not available.')
     }
-    console.log(response.body)
+
     return response.body
   }
+
+  useEffect(() => {
+    const storedMessages = localStorage.getItem("messages");
+    if (storedMessages) {
+      setMessages(JSON.parse(storedMessages));
+    }
+  }, []);
 
   const helpArticles = [
     {
@@ -201,8 +212,8 @@ const App: React.FC = () => {
   return (
     <div className='w-screen h-screen'>
       <h1>Chat Interface SDK Dev</h1>
-      {/* <ChatWidget onMessage={handleMessage} agentName='AA' placeholder='how can we help you' welcomeMessage='Need Support?' welcomeSubMessage='How can we help?' primaryColor='#000'
-        theme='light' helpArticles={helpArticles} showHelpArticles={true} /> */}
+      <ChatWidget recentMessage={messages[messages.length - 1]?.content} onMessage={handleMessage} agentName='Pagal' primaryColor='#393939' placeholder='how can we help you' welcomeMessage='Need Support?' welcomeSubMessage='How can we help?'
+        theme='light' showHistory={false} initialMessages={messages} helpArticles={helpArticles} showHelpArticles={true} />
     </div>
   )
 }

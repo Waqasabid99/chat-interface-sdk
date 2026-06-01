@@ -7,7 +7,8 @@
  * Behaviour (per PRD §4.2):
  *  - Enter        → send message
  *  - Shift+Enter  → insert newline
- *  - Textarea auto-resizes from 1 line up to MAX_ROWS, then scrolls internally
+ *  - Textarea starts as a single line and grows with content up to MAX_ROWS,
+ *    then becomes internally scrollable — matching ChatGPT's input behaviour.
  *  - Send button + textarea both disabled while isLoading is true
  *  - Send button disabled when input is empty
  *  - On send, textarea resets to single-line height immediately
@@ -23,10 +24,10 @@ import styles from './InputBar.module.css'
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 /** Line-height used for auto-resize calculation (matches CSS). */
-const LINE_HEIGHT_PX = 22
+const LINE_HEIGHT_PX = 24
 
 /** Vertical padding inside the textarea (top + bottom, matches CSS). */
-const TEXTAREA_PADDING_V = 20 // 10px top + 10px bottom
+const TEXTAREA_PADDING_V = 18 // 9px top + 9px bottom
 
 /** Maximum number of visible lines before the textarea becomes scrollable. */
 const MAX_ROWS = 5
@@ -60,7 +61,7 @@ export interface InputBarProps {
 export const InputBar: React.FC<InputBarProps> = ({
   onSend,
   isLoading = false,
-  placeholder = 'Type a message…',
+  placeholder = 'Message…',
   autoFocus = false,
   className,
 }) => {
@@ -72,18 +73,32 @@ export const InputBar: React.FC<InputBarProps> = ({
 
   /**
    * Recalculates the textarea height to fit its content, capped at MAX_HEIGHT.
-   * We temporarily set height to "auto" so scrollHeight reflects the true
-   * content height without being constrained by the current element height.
+   *
+   * Pattern used by ChatGPT / linear.app / Vercel:
+   *  1. Collapse to "auto" so scrollHeight is unconstrained.
+   *  2. Re-set to min(scrollHeight, MAX_HEIGHT_PX).
+   *  3. Toggle overflow-y so the scrollbar only appears when capped.
+   *
+   * This means the textarea is truly one line tall when empty or on a single
+   * line of text, and grows naturally as the user types.
    */
   const syncHeight = useCallback(() => {
     const el = textareaRef.current
     if (!el) return
+    // Step 1 — release the height constraint so scrollHeight reflects content
     el.style.height = 'auto'
-    el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT_PX)}px`
+    // Step 2 — clamp to our max
+    const next = Math.min(el.scrollHeight, MAX_HEIGHT_PX)
+    el.style.height = `${next}px`
+    // Step 3 — only scroll internally once capped
     el.style.overflowY = el.scrollHeight > MAX_HEIGHT_PX ? 'auto' : 'hidden'
   }, [])
 
-  /** Reset height to single-line after sending. */
+  /**
+   * Snap the textarea back to a single line after the message is sent.
+   * We set height to "auto" and let the `rows={1}` attribute handle the
+   * single-line default — no hard-coded pixel value needed.
+   */
   const resetHeight = useCallback(() => {
     const el = textareaRef.current
     if (!el) return
@@ -91,7 +106,7 @@ export const InputBar: React.FC<InputBarProps> = ({
     el.style.overflowY = 'hidden'
   }, [])
 
-  // Sync height whenever value changes
+  // Sync height whenever value changes (including paste, autocomplete, etc.)
   useEffect(() => {
     syncHeight()
   }, [value, syncHeight])
@@ -126,6 +141,8 @@ export const InputBar: React.FC<InputBarProps> = ({
     if (!trimmed || isLoading) return
     onSend(trimmed)
     setValue('')
+    // resetHeight runs synchronously here so there is no single-frame "flash"
+    // of the old tall textarea before the value-change effect fires.
     resetHeight()
   }, [value, isLoading, onSend, resetHeight])
 
@@ -156,8 +173,8 @@ export const InputBar: React.FC<InputBarProps> = ({
       {/* ── Top divider ── */}
       <div className={styles.divider} aria-hidden="true" />
 
-      {/* ── Textarea row ── */}
-      <div className={styles.textareaRow}>
+      {/* ── Input pill: textarea + send button side-by-side ── */}
+      <div className={styles.inputRow}>
         <label htmlFor={inputId} className={styles.srOnly}>
           {placeholder}
         </label>
@@ -171,6 +188,11 @@ export const InputBar: React.FC<InputBarProps> = ({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={isLoading}
+          /**
+           * rows={1} is the key to the single-line default.
+           * Combined with height:"auto" in CSS, the browser renders exactly
+           * one line of text until syncHeight() expands it.
+           */
           rows={1}
           aria-label={placeholder}
           aria-disabled={isLoading}
@@ -182,20 +204,7 @@ export const InputBar: React.FC<InputBarProps> = ({
           spellCheck
         />
 
-        {/* Hidden loading description for screen readers */}
-        {isLoading && (
-          <span
-            id={`${formId}-loading`}
-            className={styles.srOnly}
-            aria-live="polite"
-          >
-            Waiting for response…
-          </span>
-        )}
-      </div>
-
-      {/* ── Action bar: send button ── */}
-      <div className={styles.actionBar}>
+        {/* Send button lives inside the pill, right-aligned */}
         <button
           type="button"
           className={cn(styles.sendButton, canSend && styles.sendButtonActive)}
@@ -207,6 +216,17 @@ export const InputBar: React.FC<InputBarProps> = ({
         >
           {isLoading ? <LoadingSpinner /> : <SendIcon />}
         </button>
+
+        {/* Hidden loading description for screen readers */}
+        {isLoading && (
+          <span
+            id={`${formId}-loading`}
+            className={styles.srOnly}
+            aria-live="polite"
+          >
+            Waiting for response…
+          </span>
+        )}
       </div>
     </div>
   )
@@ -221,16 +241,17 @@ const SendIcon: React.FC = () => (
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="currentColor"
-    width="18"
-    height="18"
+    width="16"
+    height="16"
     aria-hidden="true"
     focusable="false"
   >
-    {/*
-      Angled paper-plane send icon.
-      Path: a filled send/arrow shape pointing top-right.
-    */}
-    <path d="M3.478 2.405a.75.75 0 0 0-.926.94l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.405Z" />
+    {/* Up-arrow — matches ChatGPT's send icon style */}
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M12 2.25a.75.75 0 0 1 .574.268l7.5 9a.75.75 0 0 1-.574 1.232H13.5V21a.75.75 0 0 1-1.5 0v-8.25H4.5a.75.75 0 0 1-.574-1.232l7.5-9A.75.75 0 0 1 12 2.25Z"
+    />
   </svg>
 )
 
@@ -239,8 +260,8 @@ const LoadingSpinner: React.FC = () => (
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
-    width="18"
-    height="18"
+    width="16"
+    height="16"
     aria-hidden="true"
     focusable="false"
     className={styles.spinner}
