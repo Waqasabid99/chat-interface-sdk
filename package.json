@@ -1,6 +1,6 @@
 {
   "name": "ai-chat-interface",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Zero-config AI chat widget for React. Drop in <ChatWidget />, pass your message handler, get a fully functional streaming chat widget.",
   "author": "Waqas Ali Abid",
   "license": "MIT",
