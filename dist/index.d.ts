@@ -53,6 +53,10 @@ declare interface ChatHeaderProps {
     dialogLabelId?: string;
     /** Extra class on the root <header> element */
     className?: string;
+    /** Whether the chat is currently maximized to full screen */
+    isMaximized?: boolean;
+    /** Toggles the maximized state */
+    onMaximizeToggle?: () => void;
 }
 
 export declare const ChatPanel: default_2.ForwardRefExoticComponent<ChatPanelProps & default_2.RefAttributes<HTMLDivElement>>;
@@ -99,6 +103,10 @@ declare interface ChatPanelProps {
     dialogLabelId?: string;
     /** Extra class on the root dialog element */
     className?: string;
+    /** Whether the chat is currently maximized to full screen */
+    isMaximized?: boolean;
+    /** Toggles the maximized state */
+    onMaximizeToggle?: () => void;
 }
 
 export declare const ChatWidget: default_2.FC<ChatWidgetProps>;
@@ -157,6 +165,10 @@ declare interface ChatWidgetProps {
     className?: string;
     /** Inline style override for the root container */
     style?: default_2.CSSProperties;
+    /** Initial messages to populate the chat history */
+    initialMessages?: Message[];
+    /** Whether to show the chat history section on the home screen. Default: false */
+    showHistory?: boolean;
 }
 
 export declare interface Formatter {
@@ -211,6 +223,10 @@ declare interface MessageBubbleProps {
      * Only rendered for assistant messages with status="error".
      */
     onRetry?: () => void;
+    /** URL string or React element used as the agent's avatar */
+    agentAvatar?: string | default_2.ReactNode;
+    /** Name shown in the widget header. Default: "AI Assistant" */
+    agentName?: string;
     /** Extra class applied to the outermost row element. */
     className?: string;
 }
@@ -224,6 +240,10 @@ declare interface MessageListProps {
      * Triggers retryLast() from useChat.
      */
     onRetry?: () => void;
+    /** URL string or React element used as the agent's avatar */
+    agentAvatar?: string | default_2.ReactNode;
+    /** Name shown in the widget header. Default: "AI Assistant" */
+    agentName?: string;
     /** Extra class applied to the scrollable root element. */
     className?: string;
 }
@@ -294,12 +314,14 @@ declare interface TypingIndicatorProps {
 
 declare type TypingIndicatorVariant = 'bubble' | 'inline' | 'standalone';
 
-export declare function useChat({ onMessage, welcomeMessage, }: UseChatOptions): UseChatReturn;
+export declare function useChat({ onMessage, welcomeMessage, initialMessages, }: UseChatOptions): UseChatReturn;
 
 export declare interface UseChatOptions {
     onMessage: OnMessageHandler;
     /** Optional welcome message shown as the first assistant message */
     welcomeMessage?: string;
+    /** Initial messages to populate the chat history */
+    initialMessages?: Message[];
 }
 
 export declare interface UseChatReturn {

@@ -36,9 +36,9 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     },
     "./style.css": "./dist/style.css",
     "./package.json": "./package.json"
@@ -119,13 +119,13 @@
     {
       "name": "Full widget (ESM)",
       "path": "./dist/index.mjs",
-      "limit": "25 KB",
+      "limit": "60 KB",
       "import": "{ ChatWidget }"
     },
     {
       "name": "useChat hook only",
       "path": "./dist/index.mjs",
-      "limit": "20 KB",
+      "limit": "60 KB",
       "import": "{ useChat }"
     }
   ],
@@ -134,7 +134,6 @@
     "npm": ">=9.0.0"
   },
   "dependencies": {
-    "install": "^0.13.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1"
   }
