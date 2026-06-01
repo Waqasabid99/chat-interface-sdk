@@ -223,7 +223,12 @@ export const ChatPanel = forwardRef<HTMLDivElement, ChatPanelProps>(
         />
 
         {/* ── Message list ── */}
-        <MessageList messages={messages} onRetry={onRetry} agentAvatar={agentAvatar} agentName={agentName} />
+        <MessageList
+          messages={messages}
+          onRetry={onRetry}
+          agentAvatar={agentAvatar}
+          agentName={agentName}
+        />
 
         {/* ── Input bar ── */}
         <InputBar

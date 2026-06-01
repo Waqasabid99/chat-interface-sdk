@@ -49,7 +49,6 @@ export interface MessageBubbleProps {
 
   /** Extra class applied to the outermost row element. */
   className?: string
-
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -61,7 +60,6 @@ function formatTime(date: Date): string {
     minute: '2-digit',
   })
 }
-
 
 /** Error icon — inline SVG, no external dep */
 const ErrorIcon: React.FC = () => (
@@ -122,7 +120,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
       },
       [onRetry]
     )
-
 
     const initials = useMemo(() => {
       const words = agentName?.trim().split(/\s+/) || []
@@ -190,22 +187,16 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
       >
         {/* ── Assistant avatar dot ── */}
         {!isUser && (agentName || agentAvatar) && (
-          <span
-            className={cn(styles.avatar)}
-            aria-hidden="false"
-          >
-            {
-              agentAvatar ? (
-                <img
-                  src={agentAvatar as string}
-                  alt={""}
-                  className={stylesHeader.avatarImg}
-
-                />
-              ) : (
-                <div className={stylesHeader.avatarInitials}>{initials}</div>
-              )
-            }
+          <span className={cn(styles.avatar)} aria-hidden="false">
+            {agentAvatar ? (
+              <img
+                src={agentAvatar as string}
+                alt={''}
+                className={stylesHeader.avatarImg}
+              />
+            ) : (
+              <div className={stylesHeader.avatarInitials}>{initials}</div>
+            )}
           </span>
         )}
 

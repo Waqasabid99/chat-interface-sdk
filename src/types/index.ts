@@ -2,7 +2,19 @@ export type Role = 'user' | 'assistant'
 
 export type Status = 'loading' | 'streaming' | 'done' | 'error'
 
-export type Block = 'ParagraphBlock' | 'ImageBlock' | 'TextBlock' | 'CodeBlock' | 'TableBlock' | 'ListBlock' | 'QuoteBlock' | 'LinkBlock' | 'VideoBlock' | 'AudioBlock' | 'FileBlock' | 'UnknownBlock'
+export type Block =
+  | 'ParagraphBlock'
+  | 'ImageBlock'
+  | 'TextBlock'
+  | 'CodeBlock'
+  | 'TableBlock'
+  | 'ListBlock'
+  | 'QuoteBlock'
+  | 'LinkBlock'
+  | 'VideoBlock'
+  | 'AudioBlock'
+  | 'FileBlock'
+  | 'UnknownBlock'
 
 export interface ChatConfig {
   theme: 'light' | 'dark' | 'auto'

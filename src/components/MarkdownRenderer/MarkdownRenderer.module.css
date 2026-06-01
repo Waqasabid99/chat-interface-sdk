@@ -30,9 +30,15 @@
   margin-top: 0;
 }
 
-.markdown h1 { font-size: 1.5em; }
-.markdown h2 { font-size: 1.25em; }
-.markdown h3 { font-size: 1.1em; }
+.markdown h1 {
+  font-size: 1.5em;
+}
+.markdown h2 {
+  font-size: 1.25em;
+}
+.markdown h3 {
+  font-size: 1.1em;
+}
 
 .markdown ul,
 .markdown ol {
@@ -45,7 +51,17 @@
 }
 
 .markdown code {
-  font-family: var(--ai-font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+  font-family: var(
+    --ai-font-mono,
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    'Liberation Mono',
+    'Courier New',
+    monospace
+  );
   font-size: 0.9em;
   padding: 0.2em 0.4em;
   border-radius: 4px;

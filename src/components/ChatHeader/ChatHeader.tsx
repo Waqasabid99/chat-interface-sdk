@@ -248,7 +248,13 @@ export const ChatHeader: React.FC<ChatHeaderProps> = memo(
     onMaximizeToggle,
   }) => {
     return (
-      <header className={cn(styles.root, isMaximized && styles.isMaximized, className)}>
+      <header
+        className={cn(
+          styles.root,
+          isMaximized && styles.isMaximized,
+          className
+        )}
+      >
         {/* ── Back button (optional) ── */}
         {onBack && (
           <button
@@ -316,7 +322,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = memo(
               type="button"
               className={cn(styles.iconButton, styles.maximizeButton)}
               onClick={onMaximizeToggle}
-              aria-label={isMaximized ? 'Restore window size' : 'Maximize window'}
+              aria-label={
+                isMaximized ? 'Restore window size' : 'Maximize window'
+              }
               title={isMaximized ? 'Restore' : 'Maximize'}
             >
               {isMaximized ? <RestoreIcon /> : <MaximizeIcon />}

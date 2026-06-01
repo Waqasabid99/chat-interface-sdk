@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { cn } from '../../utils/cn'
@@ -29,7 +29,9 @@ const CheckIcon = () => (
  * Custom CodeBlock component with a Copy button.
  * Handles both inline code and fenced code blocks.
  */
-const CodeBlock = ({ node, inline, className, children, ...props }: any) => {
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CodeBlock = ({ inline, className, children, ...props }: any) => {
   const [copied, setCopied] = useState(false)
   const match = /language-(\w+)/.exec(className || '')
   const language = match ? match[1] : ''
@@ -54,8 +56,8 @@ const CodeBlock = ({ node, inline, className, children, ...props }: any) => {
     <div className={styles.codeWrapper}>
       <div className={styles.codeHeader}>
         <span>{language}</span>
-        <button 
-          className={styles.copyButton} 
+        <button
+          className={styles.copyButton}
           onClick={handleCopy}
           aria-label="Copy code"
         >
@@ -84,10 +86,10 @@ const StreamCursor: React.FC = () => (
   <span className={styles.streamCursor} aria-hidden="true" />
 )
 
-export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ 
-  content, 
+export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
+  content,
   className,
-  isStreaming 
+  isStreaming
 }) => {
   return (
     <div className={cn(styles.markdown, className)}>
@@ -95,10 +97,10 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         remarkPlugins={[remarkGfm]}
         components={{
           code: CodeBlock,
-          a: ({ node, ...props }) => (
+          a: ({ ...props }) => (
             <a target="_blank" rel="noopener noreferrer" {...props} />
           ),
-          p: ({ node, children, ...props }) => {
+          p: ({ children, ...props }) => {
             // We only want to append the cursor if this is the last paragraph
             // and we are streaming. However, react-markdown renders top-down.
             // A simple way is to check if we are streaming and the parent is root.
