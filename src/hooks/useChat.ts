@@ -1,6 +1,18 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import type { Message, UseChatOptions, UseChatReturn } from '../types'
 import { generateId, isReadableStream } from '../utils/generateId'
+import {
+  buildInitialMessages,
+  addUserMessage,
+  insertPlaceholder,
+  startStreaming,
+  appendStreamChunk,
+  finalizeMessage,
+  finalizeStreamSuccess,
+  finalizeStreamError,
+  prepareRetry,
+  clearChat,
+} from './useChat.helpers'
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
@@ -8,26 +20,60 @@ export function useChat({
   onMessage,
   welcomeMessage,
   initialMessages,
+  messages: controlledMessages,
+  onMessagesChange,
 }: UseChatOptions): UseChatReturn {
-  const buildInitialMessages = (): Message[] => {
-    if (initialMessages && initialMessages.length > 0) {
-      return initialMessages
-    }
-    if (!welcomeMessage) return []
-    return [
-      {
-        id: generateId(),
-        role: 'assistant',
-        content: welcomeMessage,
-        timestamp: new Date(),
-        status: 'done',
-      },
-    ]
-  }
+  const isControlled = controlledMessages !== undefined
 
-  const [messages, setMessages] = useState<Message[]>(buildInitialMessages)
+  const warnedRef = useRef(false)
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'production' && !warnedRef.current) {
+      if (isControlled && initialMessages !== undefined) {
+        warnedRef.current = true
+        console.warn(
+          'useChat: Both "messages" (controlled) and "initialMessages" (uncontrolled) were passed. "initialMessages" will be ignored.'
+        )
+      }
+    }
+  }, [isControlled, initialMessages])
+
+  const [internalMessages, setInternalMessages] = useState<Message[]>(() =>
+    isControlled ? [] : buildInitialMessages(welcomeMessage, initialMessages)
+  )
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const activeMessages = isControlled
+    ? controlledMessages || []
+    : internalMessages
+
+  // Ref to always hold the latest value of messages to avoid stale closures in streaming loop
+  const messagesRef = useRef<Message[]>(activeMessages)
+  messagesRef.current = activeMessages
+
+  // Track the last rendered prop value to clear the pending state synchronously during render
+  const lastPropRef = useRef<Message[] | undefined>(controlledMessages)
+  const pendingMessagesRef = useRef<Message[] | null>(null)
+
+  if (controlledMessages !== lastPropRef.current) {
+    lastPropRef.current = controlledMessages
+    pendingMessagesRef.current = null
+  }
+
+  // updateMessages function wraps setState or onMessagesChange
+  const updateMessages = useCallback(
+    (updater: (prev: Message[]) => Message[]) => {
+      if (isControlled) {
+        const current = pendingMessagesRef.current ?? messagesRef.current
+        const next = updater(current)
+        pendingMessagesRef.current = next
+        onMessagesChange?.(next)
+      } else {
+        setInternalMessages(updater)
+      }
+    },
+    [isControlled, onMessagesChange]
+  )
 
   /**
    * Stores the last user message text so retryLast() can replay it
@@ -64,21 +110,8 @@ export function useChat({
         }
       }
 
-      const appendToAssistant = (text: string) => {
-        if (!text) return
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantId ? { ...m, content: m.content + text } : m
-          )
-        )
-      }
-
       // Mark the placeholder message as streaming
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === assistantId ? { ...m, status: 'streaming' } : m
-        )
-      )
+      updateMessages((prev) => startStreaming(prev, assistantId))
 
       try {
         // eslint-disable-next-line no-constant-condition
@@ -97,29 +130,30 @@ export function useChat({
             contentToAppend += getChunkText(line)
           }
 
-          appendToAssistant(contentToAppend)
+          if (contentToAppend) {
+            updateMessages((prev) =>
+              appendStreamChunk(prev, assistantId, contentToAppend)
+            )
+          }
         }
 
         const tail = decoder.decode()
         buffer += tail
         const finalText = getChunkText(buffer)
-        appendToAssistant(finalText)
+        if (finalText) {
+          updateMessages((prev) =>
+            appendStreamChunk(prev, assistantId, finalText)
+          )
+        }
 
         // Mark as done
-        setMessages((prev) =>
-          prev.map((m) => (m.id === assistantId ? { ...m, status: 'done' } : m))
-        )
+        updateMessages((prev) => finalizeStreamSuccess(prev, assistantId))
       } catch (streamError) {
-        console.log(streamError)
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantId
-              ? {
-                  ...m,
-                  status: 'error',
-                  content: m.content || 'Stream interrupted. Please try again.',
-                }
-              : m
+        updateMessages((prev) =>
+          finalizeStreamError(
+            prev,
+            assistantId,
+            'Stream interrupted. Please try again.'
           )
         )
         throw streamError
@@ -127,7 +161,7 @@ export function useChat({
         reader.releaseLock()
       }
     },
-    []
+    [updateMessages]
   )
 
   // ── Core send logic ─────────────────────────────────────────────────────────
@@ -140,32 +174,19 @@ export function useChat({
       setError(null)
       setIsLoading(true)
 
-      // 1. Append the user message
-      const userMessage: Message = {
-        id: generateId(),
-        role: 'user',
-        content: trimmed,
-        timestamp: new Date(),
-        status: 'done',
-      }
+      const userMessageId = generateId()
+      const assistantId = generateId()
+      const timestamp = new Date()
 
       // Capture history BEFORE the new user message for the handler
       // (history = everything the assistant has already seen)
-      const historySnapshot = messages
+      const historySnapshot = messagesRef.current
 
-      setMessages((prev) => [...prev, userMessage])
-
-      // 2. Push an empty assistant placeholder so the UI shows a loading state
-      const assistantId = generateId()
-      const assistantPlaceholder: Message = {
-        id: assistantId,
-        role: 'assistant',
-        content: '',
-        timestamp: new Date(),
-        status: 'loading',
-      }
-
-      setMessages((prev) => [...prev, assistantPlaceholder])
+      // 1 & 2. Append the user message and assistant placeholder
+      updateMessages((prev) => {
+        const withUser = addUserMessage(prev, trimmed, userMessageId, timestamp)
+        return insertPlaceholder(withUser, assistantId, timestamp)
+      })
 
       try {
         const result = await onMessage(trimmed, historySnapshot)
@@ -175,43 +196,24 @@ export function useChat({
           await handleStream(result, assistantId)
         } else {
           // Non-streaming path — populate the placeholder at once
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId
-                ? {
-                    ...m,
-                    content: result,
-                    status: 'done',
-                    timestamp: new Date(),
-                  }
-                : m
-            )
+          updateMessages((prev) =>
+            finalizeMessage(prev, assistantId, result, 'done')
           )
         }
       } catch (err) {
         const message =
           err instanceof Error ? err.message : 'Something went wrong.'
-        console.log(err)
         setError(message)
 
         // Mark the assistant placeholder as an error bubble
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantId
-              ? {
-                  ...m,
-                  content: message,
-                  status: 'error',
-                  timestamp: new Date(),
-                }
-              : m
-          )
+        updateMessages((prev) =>
+          finalizeMessage(prev, assistantId, message, 'error')
         )
       } finally {
         setIsLoading(false)
       }
     },
-    [isLoading, messages, onMessage, handleStream]
+    [isLoading, onMessage, handleStream, updateMessages]
   )
 
   // ── Public API ──────────────────────────────────────────────────────────────
@@ -232,39 +234,21 @@ export function useChat({
     const last = lastUserMessageRef.current
     if (!last) return
 
-    // Remove the last assistant message (the error bubble) so it gets replaced
-    setMessages((prev) => {
-      const lastAssistantIdx = [...prev]
-        .reverse()
-        .findIndex((m) => m.role === 'assistant')
-      if (lastAssistantIdx === -1) return prev
-      const realIdx = prev.length - 1 - lastAssistantIdx
-      return prev.filter((_, i) => i !== realIdx)
-    })
-
-    // Also remove the last user message — send() will re-add it
-    setMessages((prev) => {
-      const lastUserIdx = [...prev]
-        .reverse()
-        .findIndex((m) => m.role === 'user')
-      if (lastUserIdx === -1) return prev
-      const realIdx = prev.length - 1 - lastUserIdx
-      return prev.filter((_, i) => i !== realIdx)
-    })
-
+    updateMessages((prev) => prepareRetry(prev))
     setError(null)
     await send(last)
-  }, [send])
+  }, [send, updateMessages])
 
   const clearMessages = useCallback(() => {
-    setMessages(buildInitialMessages())
+    updateMessages(() =>
+      clearChat(welcomeMessage, isControlled ? undefined : initialMessages)
+    )
     setError(null)
     lastUserMessageRef.current = null
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [welcomeMessage])
+  }, [welcomeMessage, isControlled, initialMessages, updateMessages])
 
   return {
-    messages,
+    messages: activeMessages,
     sendMessage,
     isLoading,
     error,

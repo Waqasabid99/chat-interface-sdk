@@ -2,11 +2,31 @@ import React, { useEffect, useState } from 'react'
 import { ChatWidget, type Message } from '../src'
 
 const App: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const stored = localStorage.getItem('messages')
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored)
+        return parsed.map((m: any) => ({
+          ...m,
+          timestamp: new Date(m.timestamp),
+        }))
+      } catch {
+        return []
+      }
+    }
+    return []
+  })
 
-  const handleMessage = async (message: string, history: Message[]) => {
-    localStorage.setItem("messages", JSON.stringify(history));
+  // Debounce the localStorage write to throttle I/O
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      localStorage.setItem('messages', JSON.stringify(messages))
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [messages])
 
+  const handleMessage = async (message: string, _history: Message[]) => {
     const body = {
       model: "qwen3.5:0.8b",
       messages: [
@@ -38,13 +58,6 @@ const App: React.FC = () => {
 
     return response.body
   }
-
-  useEffect(() => {
-    const storedMessages = localStorage.getItem("messages");
-    if (storedMessages) {
-      setMessages(JSON.parse(storedMessages));
-    }
-  }, []);
 
   const helpArticles = [
     {
@@ -212,8 +225,21 @@ const App: React.FC = () => {
   return (
     <div className='w-screen h-screen'>
       <h1>Chat Interface SDK Dev</h1>
-      <ChatWidget recentMessage={messages[messages.length - 1]?.content} onMessage={handleMessage} agentName='Pagal' primaryColor='#393939' placeholder='how can we help you' welcomeMessage='Need Support?' welcomeSubMessage='How can we help?'
-        theme='light' showHistory={false} initialMessages={messages} helpArticles={helpArticles} showHelpArticles={true} />
+      <ChatWidget
+        recentMessage={messages[messages.length - 1]?.content}
+        onMessage={handleMessage}
+        agentName='Agent'
+        primaryColor='#393939'
+        placeholder='how can we help you'
+        welcomeMessage='Need Support?'
+        welcomeSubMessage='How can we help?'
+        theme='light'
+        showHistory={true}
+        messages={messages}
+        onMessagesChange={setMessages}
+        helpArticles={helpArticles}
+        showHelpArticles={true}
+      />
     </div>
   )
 }

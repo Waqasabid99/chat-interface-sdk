@@ -45,6 +45,10 @@ export interface UseChatOptions {
   welcomeMessage?: string
   /** Initial messages to populate the chat history */
   initialMessages?: Message[]
+  /** Optional controlled messages */
+  messages?: Message[]
+  /** Optional callback when messages change in controlled mode */
+  onMessagesChange?: (messages: Message[]) => void
 }
 
 export interface UseChatReturn {

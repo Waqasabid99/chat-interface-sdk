@@ -118,6 +118,12 @@ export interface ChatWidgetProps {
 
   /** Whether to show the chat history section on the home screen. Default: false */
   showHistory?: boolean
+
+  /** Optional controlled messages */
+  messages?: Message[]
+
+  /** Optional callback when messages change in controlled mode */
+  onMessagesChange?: (messages: Message[]) => void
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -146,6 +152,8 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   style,
   initialMessages,
   showHistory = false,
+  messages: controlledMessages,
+  onMessagesChange,
 }) => {
   // ── SSR guard ─────────────────────────────────────────────────────────────
   const [mounted, setMounted] = useState(false)
@@ -271,7 +279,13 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
 
   // ── Chat state ────────────────────────────────────────────────────────────
   const { messages, sendMessage, isLoading, error, clearMessages, retryLast } =
-    useChat({ onMessage, welcomeMessage, initialMessages })
+    useChat({
+      onMessage,
+      welcomeMessage,
+      initialMessages,
+      messages: controlledMessages,
+      onMessagesChange,
+    })
 
   // ── Derived recent message for home screen ──────────────────────────────
   // If showHistory is enabled and we have messages, show the last one.
@@ -285,10 +299,10 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   const displayRecentTime = canShowHistory
     ? sessionLastMessage
       ? new Intl.DateTimeFormat('en-US', {
-          hour: 'numeric',
-          minute: 'numeric',
-          hour12: true,
-        }).format(sessionLastMessage.timestamp)
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+      }).format(sessionLastMessage.timestamp)
       : undefined
     : recentMessageTime
 

@@ -169,6 +169,10 @@ declare interface ChatWidgetProps {
     initialMessages?: Message[];
     /** Whether to show the chat history section on the home screen. Default: false */
     showHistory?: boolean;
+    /** Optional controlled messages */
+    messages?: Message[];
+    /** Optional callback when messages change in controlled mode */
+    onMessagesChange?: (messages: Message[]) => void;
 }
 
 export declare interface Formatter {
@@ -314,7 +318,7 @@ declare interface TypingIndicatorProps {
 
 declare type TypingIndicatorVariant = 'bubble' | 'inline' | 'standalone';
 
-export declare function useChat({ onMessage, welcomeMessage, initialMessages, }: UseChatOptions): UseChatReturn;
+export declare function useChat({ onMessage, welcomeMessage, initialMessages, messages: controlledMessages, onMessagesChange, }: UseChatOptions): UseChatReturn;
 
 export declare interface UseChatOptions {
     onMessage: OnMessageHandler;
@@ -322,6 +326,10 @@ export declare interface UseChatOptions {
     welcomeMessage?: string;
     /** Initial messages to populate the chat history */
     initialMessages?: Message[];
+    /** Optional controlled messages */
+    messages?: Message[];
+    /** Optional callback when messages change in controlled mode */
+    onMessagesChange?: (messages: Message[]) => void;
 }
 
 export declare interface UseChatReturn {
