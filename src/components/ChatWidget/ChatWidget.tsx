@@ -299,10 +299,10 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   const displayRecentTime = canShowHistory
     ? sessionLastMessage
       ? new Intl.DateTimeFormat('en-US', {
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: true,
-      }).format(sessionLastMessage.timestamp)
+          hour: 'numeric',
+          minute: 'numeric',
+          hour12: true,
+        }).format(sessionLastMessage.timestamp)
       : undefined
     : recentMessageTime
 
